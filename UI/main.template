@@ -1,0 +1,8 @@
+﻿<div class="btn-group" role="group" aria-label="Main">
+<button type='button' class='btn btn-info'onclick='shutdown_action("lock", "{{password}}")'>lock</button>
+<button type='button' class='btn btn-warning'onclick='shutdown_action("sleep", "{{password}}")'>sleep</button> 
+<button type='button' class='btn btn-success'onclick='shutdown_action("reboot", "{{password}}")'>reboot</button>
+<button type='button' class='btn btn-danger'onclick='shutdown_action("shutdown", "{{password}}")'>shutdown</button>
+<button type='button' class='btn btn-warning'onclick='shutdown_action("hibernate", "{{password}}")'>hibernate</button>
+<button type='button' class='btn btn-primary'onclick='shutdown_action("cancel", "{{password}}")'>cancel</button>
+</div>
