@@ -156,7 +156,7 @@ namespace PCShutdown
     {
         static NotifyIcon tray = new NotifyIcon();
         ContextMenuStrip menu = new ContextMenuStrip();
-
+        
         ConfigForm configForm = new ConfigForm();
         ToolStripItem ip;
 
@@ -165,16 +165,26 @@ namespace PCShutdown
         {
             ip = menu.Items.Add(Server.GetLocalIPv4()[0].ToString(), Resource.settings, UpdateIP);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("Выключить ПК", Resource.power, OnShutdown);
-            menu.Items.Add("Перезагрузить ПК", Resource.reboot, OnReboot);
-            menu.Items.Add("Заблокировать", Resource.padlock, OnLock);
-            menu.Items.Add("Гибернация", Resource.hibernate, OnHibernate);
-            menu.Items.Add("Сон", Resource.sleep, OnSleep);
+
+            ToolStripItem commands = menu.Items.Add("Выполнить сейчас", Resource.check);
+
+            ToolStripItem timers = menu.Items.Add("Отложенная команда", Resource.hourglass);
+
+            (commands as ToolStripMenuItem).DropDownItems.Add("Выключить ПК", Resource.power, OnShutdown);
+            (commands as ToolStripMenuItem).DropDownItems.Add("Перезагрузить ПК", Resource.reboot, OnReboot);
+            (commands as ToolStripMenuItem).DropDownItems.Add("Заблокировать", Resource.padlock, OnLock);
+            (commands as ToolStripMenuItem).DropDownItems.Add("Гибернация", Resource.hibernate, OnHibernate);
+            (commands as ToolStripMenuItem).DropDownItems.Add("Сон", Resource.sleep, OnSleep);
+
+            (timers as ToolStripMenuItem).DropDownItems.Add("По таймеру", Resource.hourglass, ByTimer);
+            (timers as ToolStripMenuItem).DropDownItems.Add("В определенное время", Resource.timer, InTime);
+
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Настройки", Resource.settings, OnSettings);
             menu.Items.Add("Отменить отключение", Resource.save, OnCancel);
             menu.Items.Add("Выход", Resource.close, OnExit);
 
+            
 
             tray.Icon = new Icon(Resource.icon, 40, 40);
             tray.Text = "PCShutdown";
@@ -201,12 +211,35 @@ namespace PCShutdown
 
         private void UpdateIP(object sender, EventArgs e)
         {
+            
             ip.Text = Server.GetLocalIPv4()[0].ToString();
             menu.Show();
+
+            string url = "http://" + ip.Text + ":" + Server.localPort + "/?password=" + Properties.Settings.Default.Password;
+
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
         private void OnExit(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void ByTimer(object sender, EventArgs e)
+        {
+            ByTimerConfigForm btf = new ByTimerConfigForm();
+
+            btf.Show();
+
+
+        }
+
+        private void InTime(object sender, EventArgs e)
+        {
+            InTimeConfigForm itf = new InTimeConfigForm();
+
+            itf.Show();
+
+
         }
 
 
@@ -254,9 +287,6 @@ namespace PCShutdown
             ShowBallon("Отмена операции отключения/перезагрузки", ToolTipIcon.Info);
             Server.execCommand("cancel", delay);
         }
-
-
-
 
         private void tray_Click(object sender, EventArgs e)
         {

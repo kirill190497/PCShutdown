@@ -42,6 +42,9 @@
     <None Update="UI\danger.template">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="UI\redirect.template">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="UI\success.template">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -78,6 +79,7 @@ namespace PCShutdown
                 string password;
                 string action;
                 string answer;
+                string responseMode;
                 int delay = Properties.Settings.Default.Delay;
 
 
@@ -86,13 +88,15 @@ namespace PCShutdown
                 {
                     password = request.QueryString.Get("password");
                     action = request.QueryString.Get("action");
+                    responseMode = request.QueryString.Get("response");
                     string password_arg = password != null ? "?password=" + password : "";
                     List<Tuple<string, string>> args = new List<Tuple<string, string>>();
                     if (action == null && (password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck))
                     {
                         args.Clear();
+                        args.Add(new Tuple<string, string>("text", "Не указано действие"));
                         args.Add(new Tuple<string, string>("password", password));
-                        answer = ParseTemplate("main", args);
+                        answer = ParseTemplate("main", args, responseMode);
                     }
                     else if ((password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck) || action == "handshake")
                     {
@@ -101,40 +105,56 @@ namespace PCShutdown
                         {
                             case "lock":
                                 args.Clear();
-                                args.Add(new Tuple<string, string>("text", "Блокировка"));
+                                args.Add(new Tuple<string, string>("text", "Блокировка" + responseMode));
                                 args.Add(new Tuple<string, string>("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>Back</button>"));
-                                answer = ParseTemplate("success", args);
+                                answer = ParseTemplate("success", args, responseMode);
                                 break;
 
                             case "reboot":
                                 args.Clear();
                                 args.Add(new Tuple<string, string>("text", "Перезагрузка"));
                                 args.Add(new Tuple<string, string>("button", "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>Отмена</button>"));
-                                answer = ParseTemplate("success", args);
+                                answer = ParseTemplate("success", args, responseMode);
                                 break;
                             case "shutdown":
                                 args.Clear();
                                 args.Add(new Tuple<string, string>("text", "Выключение"));
                                 args.Add(new Tuple<string, string>("button", "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>Отмена</button>"));
-                                answer = ParseTemplate("success", args);
+                                answer = ParseTemplate("success", args, responseMode);
                                 break;
                             case "sleep":
                                 args.Clear();
                                 args.Add(new Tuple<string, string>("text", "Спящий режим"));
                                 args.Add(new Tuple<string, string>("button", "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>Отмена</button>-->"));
-                                answer = ParseTemplate("success", args);
+                                answer = ParseTemplate("success", args, responseMode);
                                 break;
                             case "hibernate":
                                 args.Clear();
-                                args.Add(new Tuple<string, string>("text", "Гибернацция"));
+                                args.Add(new Tuple<string, string>("text", "Гибернация"));
                                 args.Add(new Tuple<string, string>("button", "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>Отмена</button>-->"));
-                                answer = ParseTemplate("success", args);
+                                answer = ParseTemplate("success", args, responseMode);
                                 break;
-                            case "cancel": answer = "<script type='text/javascript'>window.location.replace('/" + password_arg + "')</script>"; break;
-                            case "handshake": answer = "OK"; break;
+                            case "cancel":
+                                args.Clear();
+                                args.Add(new Tuple<string, string>("text", "Отмена действия"));
+                                args.Add(new Tuple<string, string>("password", password_arg));
+                                answer = ParseTemplate("redirect", args, responseMode);
+                                break;
+                                
+                            case "handshake":
+                                args.Clear();
+                                args.Add(new Tuple<string, string>("text", "Okay")); 
+                                answer = ParseTemplate("success", args, responseMode);
+                                break;
 
 
-                            default: answer = "<script type='text/javascript'>window.location.replace('/'" + password_arg + ")</script>"; break;
+                            default:
+                                args.Clear();
+                                args.Add(new Tuple<string, string>("text", "Действие не определено"));
+                                args.Add(new Tuple<string, string>("password", password_arg));
+                                args.Add(new Tuple<string, string>("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>Home</button>"));
+                                answer = ParseTemplate("danger", args, responseMode);
+                                break;
                         }
                         execCommand(action, delay);
 
@@ -145,7 +165,7 @@ namespace PCShutdown
                         args.Add(new Tuple<string, string>("text", "Пароль не верный или не указан"));
                         args.Add(new Tuple<string, string>("button", "<div class='input-group mb-3'><input type='password' class='form-control' placeholder='Введите пароль' aria-label='Введите пароль' id='password' aria-describedby='button-addon2'><button class='btn btn-outline-secondary' onclick='enter_password()' type='button' id='button-addon2'>Вход</button></div>"));
                         args.Add(new Tuple<string, string>("script", "<script type='text/javascript'>function enter_password(){input = document.getElementById('password');  window.location.replace('/?password='+input.value); }</script>"));
-                        answer = ParseTemplate("danger", args);
+                        answer = ParseTemplate("danger", args, responseMode);
                     }
 
 
@@ -168,23 +188,27 @@ namespace PCShutdown
             }
         }
 
-        private static string ParseTemplate(string name, List<Tuple<string, string>> args = null)
+        private static string ParseTemplate(string name, List<Tuple<string, string>> args, string mode=default)
         {
             string base_template = File.ReadAllText(@"UI/base.template");
             string template = File.ReadAllText(@"UI/" + name + ".template");
             //string template = "";
-            if (args != null)
+            
+            foreach (Tuple<string, string> arg in args)
             {
-                foreach (Tuple<string, string> arg in args)
-                {
-                    template = template.Replace("{{" + arg.Item1 + "}}", arg.Item2);
-                }
+                template = template.Replace("{{" + arg.Item1 + "}}", arg.Item2);
             }
 
-
-
-            return base_template.Replace("{{body}}", template);
-
+            //Regex rg = new Regex("/{/{/w+/}/}");
+            template = Regex.Replace(template, @"\{\{(\w+)\}\}", "");
+            Console.Write(mode);
+            return mode switch
+            {
+                "text" => args[0].Item2,
+                "json" => "{\"" + args[0].Item1 + "\":\"" + args[0].Item2 + "\"}",
+                "html" => base_template.Replace("{{body}}", template),
+                _ => base_template.Replace("{{body}}", template),
+            };
         }
 
 
@@ -219,6 +243,10 @@ namespace PCShutdown
                 case "shutdown":
                     baloon_text = "Компьютер будет выключен через " + delay + " секунд";
                     args = " -s -t " + delay + " -c \"Компьютер будет выключен через " + delay + " секунд\"";
+                    break;
+                default:
+                    baloon_text = "Команда не распознана! Указана задержка: " + delay + " секунд";
+                    args = default;
                     break;
             }
             if (baloon_text != default) ShutdownApp.ShowBallon(baloon_text, ToolTipIcon.Info);
