@@ -1,0 +1,6 @@
+0 ICON "Resources\\icon.ico"
+1 ICON "Resources\\icons\\power.ico"
+2 ICON "Resources\\icons\\reboot.ico"
+3 ICON "Resources\\icons\\sleep.ico"
+4 ICON "Resources\\icons\\hibernate.ico"
+5 ICON "Resources\\icons\\padlock.ico"

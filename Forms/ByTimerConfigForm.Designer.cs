@@ -1,4 +1,4 @@
-﻿namespace PCShutdown
+﻿namespace PCShutdown.Forms
 {
     partial class ByTimerConfigForm
     {
@@ -30,12 +30,14 @@
         {
             this.command = new System.Windows.Forms.ComboBox();
             this.Save = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.command_label = new System.Windows.Forms.Label();
+            this.after_label = new System.Windows.Forms.Label();
             this.value = new System.Windows.Forms.NumericUpDown();
             this.period = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.exectime_label = new System.Windows.Forms.Label();
             this.remained_label = new System.Windows.Forms.Label();
+            this.comment_label = new System.Windows.Forms.Label();
+            this.comment = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.value)).BeginInit();
             this.SuspendLayout();
             // 
@@ -53,31 +55,31 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Save.AutoSize = true;
-            this.Save.Location = new System.Drawing.Point(12, 128);
+            this.Save.Location = new System.Drawing.Point(12, 188);
             this.Save.Name = "Save";
-            this.Save.Size = new System.Drawing.Size(255, 34);
+            this.Save.Size = new System.Drawing.Size(255, 41);
             this.Save.TabIndex = 1;
             this.Save.Text = "Сохранить";
             this.Save.UseVisualStyleBackColor = true;
             this.Save.Click += new System.EventHandler(this.Save_Click);
             // 
-            // label1
+            // command_label
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(55, 15);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Команда";
+            this.command_label.AutoSize = true;
+            this.command_label.Location = new System.Drawing.Point(12, 15);
+            this.command_label.Name = "command_label";
+            this.command_label.Size = new System.Drawing.Size(55, 15);
+            this.command_label.TabIndex = 2;
+            this.command_label.Text = "Команда";
             // 
-            // label2
+            // after_label
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 42);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(45, 15);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Через: ";
+            this.after_label.AutoSize = true;
+            this.after_label.Location = new System.Drawing.Point(12, 42);
+            this.after_label.Name = "after_label";
+            this.after_label.Size = new System.Drawing.Size(45, 15);
+            this.after_label.TabIndex = 4;
+            this.after_label.Text = "Через: ";
             // 
             // value
             // 
@@ -101,42 +103,65 @@
             this.period.TabIndex = 6;
             this.period.SelectedIndexChanged += new System.EventHandler(this.period_SelectedIndexChanged);
             // 
-            // label3
+            // exectime_label
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 85);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(108, 15);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Будет выполнена: ";
+            this.exectime_label.AutoSize = true;
+            this.exectime_label.Location = new System.Drawing.Point(15, 170);
+            this.exectime_label.Name = "exectime_label";
+            this.exectime_label.Size = new System.Drawing.Size(108, 15);
+            this.exectime_label.TabIndex = 7;
+            this.exectime_label.Text = "Будет выполнена: ";
             // 
             // remained_label
             // 
             this.remained_label.AutoSize = true;
-            this.remained_label.Location = new System.Drawing.Point(153, 85);
+            this.remained_label.Location = new System.Drawing.Point(156, 170);
             this.remained_label.Name = "remained_label";
             this.remained_label.Size = new System.Drawing.Size(94, 15);
             this.remained_label.TabIndex = 8;
             this.remained_label.Text = "00:00 01.01.1970 ";
             // 
+            // comment_label
+            // 
+            this.comment_label.AutoSize = true;
+            this.comment_label.Location = new System.Drawing.Point(12, 78);
+            this.comment_label.Name = "comment_label";
+            this.comment_label.Size = new System.Drawing.Size(87, 15);
+            this.comment_label.TabIndex = 9;
+            this.comment_label.Text = "Комментарий:";
+            // 
+            // comment
+            // 
+            this.comment.Location = new System.Drawing.Point(12, 96);
+            this.comment.Multiline = true;
+            this.comment.Name = "comment";
+            this.comment.Size = new System.Drawing.Size(255, 71);
+            this.comment.TabIndex = 10;
+            // 
             // ByTimerConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(279, 191);
+            this.ClientSize = new System.Drawing.Size(279, 241);
+            this.Controls.Add(this.comment);
+            this.Controls.Add(this.comment_label);
             this.Controls.Add(this.remained_label);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.exectime_label);
             this.Controls.Add(this.period);
             this.Controls.Add(this.value);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.after_label);
+            this.Controls.Add(this.command_label);
             this.Controls.Add(this.Save);
             this.Controls.Add(this.command);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ByTimerConfigForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Выполнить по таймеру";
+            this.TopMost = true;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ByTimerConfigForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.value)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -147,11 +172,13 @@
 
         private System.Windows.Forms.ComboBox command;
         private System.Windows.Forms.Button Save;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label command_label;
+        private System.Windows.Forms.Label after_label;
         private System.Windows.Forms.NumericUpDown value;
         private System.Windows.Forms.ComboBox period;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label exectime_label;
         private System.Windows.Forms.Label remained_label;
+        private System.Windows.Forms.Label comment_label;
+        private System.Windows.Forms.TextBox comment;
     }
 }

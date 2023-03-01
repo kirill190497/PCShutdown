@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PCShutdown": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}

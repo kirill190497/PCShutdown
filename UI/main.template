@@ -1,8 +1,53 @@
-﻿<div class="btn-group" role="group" aria-label="Main">
-<button type='button' class='btn btn-info'onclick='shutdown_action("lock", "{{password}}")'>lock</button>
-<button type='button' class='btn btn-warning'onclick='shutdown_action("sleep", "{{password}}")'>sleep</button> 
-<button type='button' class='btn btn-success'onclick='shutdown_action("reboot", "{{password}}")'>reboot</button>
-<button type='button' class='btn btn-danger'onclick='shutdown_action("shutdown", "{{password}}")'>shutdown</button>
-<button type='button' class='btn btn-warning'onclick='shutdown_action("hibernate", "{{password}}")'>hibernate</button>
-<button type='button' class='btn btn-primary'onclick='shutdown_action("cancel", "{{password}}")'>cancel</button>
-</div>
+﻿
+<form class="row g-2">
+  <div class="form-floating">
+    
+    <select class="form-select" id="action">
+      <option value="shutdown">{{strings.ShutdownPC}}</option>
+      <option value="reboot">{{strings.RebootPC}}</option>
+      <option selected value="lock">{{strings.LockScreen}}</option>
+      <option value="sleep">{{strings.Sleep}}</option>
+      <option value="hibernate">{{strings.Hibernation}}</option>
+      <option value="notification">{{strings.Notification}}</option>
+  
+    </select>
+    <label class="" for="action">{{strings.Action}}</label>
+  </div>
+  <div class="form-floating">
+    <textarea class="form-control" placeholder="Leave a comment here" id="message" style="height: 100px"></textarea>
+    <label for="message">{{strings.Message}}</label>
+    </div>
+  <div class="form-floating">
+    <input class="form-control" id="date" type="datetime-local">
+      <label for="date">{{strings.ExecTime}}</label>
+    </div>
+  <button type="button" id="send"  class="btn btn-success">{{strings.SendButton}}</button>
+  <button type="button" id="cancel"  class="btn btn-warning">{{strings.CancelTasks}}</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+
+<script>
+  $( document ).ready(function() {
+  var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+  var date = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+  //var date = new Date().toISOString();
+  var today = date.slice(0, date.lastIndexOf(":") );
+  console.log( date);
+  $("#date").val(today);
+  $("#date").attr( 'min',today);
+
+  });
+  $("#cancel").on("click", function() {
+  shutdown_action("cancel", "{{password}}", "{{strings.CancelTasks}}", 0);
+  });
+
+  $("#send").on("click", function() {
+
+  var action = $( "#action option:selected" ).val();
+  var message = $("#message").val();
+  var date =  new Date( $("#date").val()).getTime();
+
+  shutdown_action(action, "{{password}}", message, date);
+  });
+</script>

@@ -1,10 +1,16 @@
 
+
+using PCShutdown.Classes;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using PCShutdown.Properties;
+using System.Security.Policy;
+using System.Text.RegularExpressions;
 
 namespace PCShutdown
 {
@@ -15,15 +21,19 @@ namespace PCShutdown
         /// </summary>
         /// 
 
+
+
+
         static bool CheckFirewallRules()
         {
 
-            using (Process process = new Process())
+            using (Process process = new())
             {
                 process.StartInfo.FileName = "netsh";
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.Verb = "runas";
+                process.StartInfo.CreateNoWindow= true;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 process.StartInfo.Arguments = "http show urlacl url=http://+:" + Server.localPort.ToString() + "/";
                 process.Start();
@@ -42,260 +52,133 @@ namespace PCShutdown
 
                     if (firewall_output.Contains("PCShutdown"))
                     {
-                        Properties.Settings.Default.UrlAcl = true;
-                        Properties.Settings.Default.Save();
+                        Settings.Default.UrlAcl = true;
+                        Settings.Default.Save();
                     }
                     else
                     {
-                        Properties.Settings.Default.UrlAcl = false;
-                        Properties.Settings.Default.Save();
+                        Settings.Default.UrlAcl = false;
+                        Settings.Default.Save();
                     }
 
                 }
                 else
                 {
-                    Properties.Settings.Default.UrlAcl = false;
-                    Properties.Settings.Default.Save();
+                    Settings.Default.UrlAcl = false;
+                    Settings.Default.Save();
                 }
                 // Write the redirected output to this application's window.
 
 
                 process.WaitForExit();
-                return Properties.Settings.Default.UrlAcl;
+                return Settings.Default.UrlAcl;
             }
         }
 
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            UrlProtocol.Register();
+            if (args.Length != 0)
+            {
+                UrlProtocol.ParseUrl(args[0]);
+            }
+            Application.ThreadException +=
+                new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             if (!CheckFirewallRules())
             {
-                MessageBox.Show("Добавляю исключения в фаервол. ");
+                MessageBox.Show(ShutdownApp.Translation.Lang.Strings.AddingFirewallRules);
                 string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
                 string add_http = "http add urlacl url=\"http://+:{0}/\" user={1}";
                 string add_firewall = "advfirewall firewall add rule name=PCShutdown dir={0} protocol=tcp localport={1} action=allow";
 
 
                 ProcessStartInfo startInfo = default;
-                startInfo = new ProcessStartInfo("netsh")
+                startInfo = new("netsh")
                 {
-                    UseShellExecute = true,
+                    UseShellExecute = false,
                     Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     FileName = "netsh",
-                    Arguments = String.Format(add_http, Server.localPort, "Все"),
+                    Arguments = string.Format(add_http, Server.localPort, "Все"),
                     CreateNoWindow = true
                 };
                 Process.Start(startInfo);
 
-                startInfo = new ProcessStartInfo("netsh")
+                startInfo = new("netsh")
                 {
-                    UseShellExecute = true,
+                    UseShellExecute = false,
+                    
                     Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     FileName = "netsh",
-                    Arguments = String.Format(add_firewall, "in", Server.localPort),
+                    Arguments = string.Format(add_firewall, "in", Server.localPort),
                     CreateNoWindow = true
                 };
                 Process.Start(startInfo);
 
-                startInfo = new ProcessStartInfo("netsh")
+                startInfo = new("netsh")
                 {
-                    UseShellExecute = true,
+                    UseShellExecute = false,
                     Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     FileName = "netsh",
-                    Arguments = String.Format(add_firewall, "out", Server.localPort),
+                    Arguments = string.Format(add_firewall, "out", Server.localPort),
                     CreateNoWindow = true
                 };
                 Process.Start(startInfo);
 
                 if (CheckFirewallRules())
                 {
-                    Properties.Settings.Default.UrlAcl = true;
 
-                    Properties.Settings.Default.Save();
-                    MessageBox.Show("Исключения добавлены, запуск.");
+                    Settings.Default.UrlAcl = true;
+
+                    Settings.Default.Save();
+                    MessageBox.Show(ShutdownApp.Translation.Lang.Strings.FirewallRulesAdded);
                 }
                 else
                 {
-                    MessageBox.Show("Ошибка добавления правил фаервола, попробуйте еще раз");
+                    MessageBox.Show(ShutdownApp.Translation.Lang.Strings.ErrorAddingFirewallRules);
                 }
 
             }
 
-
-
-
-
-
-
-            if (Properties.Settings.Default.UrlAcl)
+            if (Settings.Default.UrlAcl)
             {
-                ShutdownApp app = new ShutdownApp();
+
+
+                ShutdownApp app = new();
                 app.Start();
 
                 Application.Run();
             }
-
-
-            //Console.ReadKey();
         }
 
-
-
-
-
-    }
-
-    class ShutdownApp
-    {
-        static NotifyIcon tray = new NotifyIcon();
-        ContextMenuStrip menu = new ContextMenuStrip();
-        
-        ConfigForm configForm = new ConfigForm();
-        ToolStripItem ip;
-
-        int delay = Properties.Settings.Default.Delay;
-        public void Start()
+        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            ip = menu.Items.Add(Server.GetLocalIPv4()[0].ToString(), Resource.settings, UpdateIP);
-            menu.Items.Add(new ToolStripSeparator());
-
-            ToolStripItem commands = menu.Items.Add("Выполнить сейчас", Resource.check);
-
-            ToolStripItem timers = menu.Items.Add("Отложенная команда", Resource.hourglass);
-
-            (commands as ToolStripMenuItem).DropDownItems.Add("Выключить ПК", Resource.power, OnShutdown);
-            (commands as ToolStripMenuItem).DropDownItems.Add("Перезагрузить ПК", Resource.reboot, OnReboot);
-            (commands as ToolStripMenuItem).DropDownItems.Add("Заблокировать", Resource.padlock, OnLock);
-            (commands as ToolStripMenuItem).DropDownItems.Add("Гибернация", Resource.hibernate, OnHibernate);
-            (commands as ToolStripMenuItem).DropDownItems.Add("Сон", Resource.sleep, OnSleep);
-
-            (timers as ToolStripMenuItem).DropDownItems.Add("По таймеру", Resource.hourglass, ByTimer);
-            (timers as ToolStripMenuItem).DropDownItems.Add("В определенное время", Resource.timer, InTime);
-
-            menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("Настройки", Resource.settings, OnSettings);
-            menu.Items.Add("Отменить отключение", Resource.save, OnCancel);
-            menu.Items.Add("Выход", Resource.close, OnExit);
-
-            
-
-            tray.Icon = new Icon(Resource.icon, 40, 40);
-            tray.Text = "PCShutdown";
-            tray.DoubleClick += tray_Click;
-
-            tray.Visible = true;
-            tray.ContextMenuStrip = menu;
-
-            Server.Start();
-            //await Task.Run(StartListener);
-        }
-
-        public static void ShowBallon(string text, ToolTipIcon icon = ToolTipIcon.Info, int delay = 3000)
-        {
-            tray.BalloonTipIcon = icon;
-            tray.BalloonTipText = text;
-            if (text.Length > 0)
+            Exception exception = e.Exception;
+            string message = exception.Message;
+            string stacktrace = exception.StackTrace;
+            string source = exception.Source;
+            if (exception.InnerException != null)
             {
-                tray.ShowBalloonTip(delay);
+                message = exception.InnerException.Message;
+                stacktrace = exception.InnerException.StackTrace;
+                source = exception.InnerException.Source;
             }
 
-        }
+            //string body = message + "\n" + stacktrace + "\n" + source;
 
+            MessageBox.Show(message, "Application error!");
 
-        private void UpdateIP(object sender, EventArgs e)
-        {
-            
-            ip.Text = Server.GetLocalIPv4()[0].ToString();
-            menu.Show();
-
-            string url = "http://" + ip.Text + ":" + Server.localPort + "/?password=" + Properties.Settings.Default.Password;
-
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        private void OnExit(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void ByTimer(object sender, EventArgs e)
-        {
-            ByTimerConfigForm btf = new ByTimerConfigForm();
-
-            btf.Show();
 
 
         }
 
-        private void InTime(object sender, EventArgs e)
-        {
-            InTimeConfigForm itf = new InTimeConfigForm();
-
-            itf.Show();
-
-
-        }
-
-
-        [DllImport("user32.dll")]
-        static extern bool LockWorkStation();
-        [DllImport("PowrProf.dll")]
-        static extern bool SetSuspendState(bool bHibernate);
-
-
-        private void OnLock(object sender, EventArgs e)
-        {
-            Server.execCommand("lock");
-        }
-
-        private void OnSettings(object sender, EventArgs e)
-        {
-            configForm.Show();
-        }
-
-        private void OnShutdown(object sender, EventArgs e)
-        {
-            Server.execCommand("shutdown", delay);
-
-        }
-
-        private void OnReboot(object sender, EventArgs e)
-        {
-
-            Server.execCommand("reboot", delay);
-
-        }
-
-        private void OnHibernate(object sender, EventArgs e)
-        {
-            Server.execCommand("hibernate");
-        }
-
-        private void OnSleep(object sender, EventArgs e)
-        {
-            Server.execCommand("sleep");
-        }
-
-        private void OnCancel(object sender, EventArgs e)
-        {
-            ShowBallon("Отмена операции отключения/перезагрузки", ToolTipIcon.Info);
-            Server.execCommand("cancel", delay);
-        }
-
-        private void tray_Click(object sender, EventArgs e)
-        {
-            configForm.Show();
-        }
-
-        private void tray_exitClick(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
     }
+
 }

@@ -1,0 +1,5 @@
+﻿<div class="alert alert-{{alert_type}}" role="alert">
+  {{text}} {{button}}
+</div>
+
+{{script}}
