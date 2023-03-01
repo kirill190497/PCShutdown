@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using PCShutdown.Properties;
 using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.IO.Compression;
 
 namespace PCShutdown
 {
@@ -33,7 +34,7 @@ namespace PCShutdown
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.Verb = "runas";
-                process.StartInfo.CreateNoWindow= true;
+                process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 process.StartInfo.Arguments = "http show urlacl url=http://+:" + Server.localPort.ToString() + "/";
                 process.Start();
@@ -75,9 +76,52 @@ namespace PCShutdown
             }
         }
 
+        static void CheckUpdates()
+        {
+            var url = @"https://api.github.com/repos/kirill190497/PCShutdown/releases/latest";
+            var remote = Request.GetJSON(url);
+            var remoteVersion = remote["tag_name"].ToString();
+            var rv = remoteVersion.Split(".");
+            var lv = Application.ProductVersion.Split(".");
+            bool update = false;
+
+
+            if (int.Parse(rv[0]) > int.Parse(lv[0]))
+            {
+                update = true;
+            }
+            else if (int.Parse(rv[1]) > int.Parse(lv[1]))
+            {
+                update = true;
+            }
+            else if (int.Parse(rv[2]) > int.Parse(lv[2]))
+            {
+                update = true;
+            }
+            // {major}.{minor}.{patch}
+
+
+            if (update)
+            {
+                var res = MessageBox.Show("New update available! Download now?", "PCShutdown: Update available", MessageBoxButtons.YesNo);
+                if (res == DialogResult.Yes)
+                {
+                    var file_url = remote["assets"][0]["browser_download_url"].ToString();
+                    var file_dest = Application.StartupPath + file_url.Split("/")[^1];
+                    Request.SaveFile(file_url, file_dest);
+
+                    MessageBox.Show("File saved! Please unzip and replace files manualy!");
+                    Process.Start("explorer.exe", Application.StartupPath);
+                }
+            }
+
+        }
+
+
         [STAThread]
         static void Main(string[] args)
         {
+            CheckUpdates();
             UrlProtocol.Register();
             if (args.Length != 0)
             {
