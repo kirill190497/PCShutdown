@@ -83,10 +83,10 @@ namespace PCShutdown
             var remote = Request.GetJSON(url);
             var remoteVersion = remote["tag_name"].ToString();
             var rv = remoteVersion.Split(".");
-            var lv = Application.ProductVersion.Split(".");
+
+            var lv = Application.ProductVersion.Split("+")[0].Split('.');
             bool update = false;
 
-            
             if (int.Parse(rv[0]) > int.Parse(lv[0]))
             {
                 update = true;
@@ -108,11 +108,11 @@ namespace PCShutdown
                 if (res == DialogResult.Yes)
                 {
                     var file_url = remote["assets"][0]["browser_download_url"].ToString();
-                    var file_dest = Application.StartupPath + file_url.Split("/")[^1];
+                    var file_dest = Settings.Default.WorkPath + file_url.Split("/")[^1];
                     Request.SaveFile(file_url, file_dest);
 
                     MessageBox.Show("File saved! Please unzip and replace files manualy!");
-                    Process.Start("explorer.exe", Application.StartupPath);
+                    Process.Start("explorer.exe", Settings.Default.WorkPath);
                 }
             }
 
