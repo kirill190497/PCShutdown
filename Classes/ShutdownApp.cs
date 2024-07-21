@@ -2,24 +2,22 @@
 
 using PCShutdown.Forms;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PCShutdown.Classes.TelegramBot;
+using System.Collections.Generic;
 
 namespace PCShutdown.Classes
 {
 
     internal class ShutdownApp
     {
-        static NotifyIcon tray = new NotifyIcon();
-        ContextMenuStrip menu = new ContextMenuStrip();
-        public static Translation Translation = new Translation(Properties.Settings.Default.Language);
-        public static FormsManager Forms = new FormsManager();
+        static NotifyIcon tray = new();
+        ContextMenuStrip menu = new();
+        public static Translation Translation = new(Properties.Settings.Default.Language);
+        public static FormsManager Forms = new();
         public static Form GlobalForm;
 
         int delay = Properties.Settings.Default.Delay;
@@ -35,11 +33,10 @@ namespace PCShutdown.Classes
             ToastNotificationManagerCompat.History.Clear();
             if (Properties.Settings.Default.TelegramBotToken != "" & Properties.Settings.Default.TelegramAdmin != 0) 
             {
-                ShutdownTelegramBot.Run();
+                 ShutdownTelegramBot.Run();
             }
-            
 
-            //MessageBox.Show(sl.TryUnlock("1904").ToString());
+            
 
             ToolStripItem interfaces = menu.Items.Add(Translation.Lang.Strings.NetworkInterfaces, Resource.ipaddress2);
 
@@ -51,6 +48,12 @@ namespace PCShutdown.Classes
                 (netif as ToolStripMenuItem).DropDownItems.Add(item.Description, Resource.comment);
             }
 
+            
+            PowerStatus pwr = SystemInformation.PowerStatus;
+            
+            string strBatteryChargingStatus = (pwr.BatteryLifePercent * 100) +"% "+ pwr.BatteryChargeStatus.ToString() ;
+            menu.Items.Add(strBatteryChargingStatus, Resource.battery);
+            
             menu.Items.Add(new ToolStripSeparator());
 
             menu.Items.Add(Translation.Lang.Strings.ShutdownPC, Resource.power, OnShutdown);
@@ -84,7 +87,7 @@ namespace PCShutdown.Classes
 
 #endif
             tray.Text = "PCShutdown";
-            tray.DoubleClick += tray_Click;
+            tray.DoubleClick += Tray_Click;
 
             tray.Visible = true;
             tray.ContextMenuStrip = menu;
@@ -171,7 +174,7 @@ namespace PCShutdown.Classes
 
         private void OnLock(object sender, EventArgs e)
         {
-            Server.ExecCommand(ShutdownTask.TaskType.Lock);
+            Server.ExecCommand(ShutdownTask.TaskType.Lock);      
         }
 
         private void OnSettings(object sender, EventArgs e)
@@ -209,14 +212,11 @@ namespace PCShutdown.Classes
             Server.ExecCommand(ShutdownTask.TaskType.Cancel, delay);
         }
 
-        private void tray_Click(object sender, EventArgs e)
+        private void Tray_Click(object sender, EventArgs e)
         {
            Forms.ShowForm(typeof(ConfigForm));
         }
 
-        private void tray_exitClick(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
+        
     }
 }

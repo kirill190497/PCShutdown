@@ -28,84 +28,94 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.unlockButton = new System.Windows.Forms.Button();
-            this.LockedLabel = new System.Windows.Forms.Label();
-            this.pincode = new System.Windows.Forms.TextBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panel1.SuspendLayout();
-            this.SuspendLayout();
+            unlockButton = new System.Windows.Forms.Button();
+            LockedLabel = new System.Windows.Forms.Label();
+            pincode = new System.Windows.Forms.TextBox();
+            panel1 = new System.Windows.Forms.Panel();
+            ErrorLabel = new System.Windows.Forms.Label();
+            panel1.SuspendLayout();
+            SuspendLayout();
             // 
             // unlockButton
             // 
-            this.unlockButton.Location = new System.Drawing.Point(352, 78);
-            this.unlockButton.Name = "unlockButton";
-            this.unlockButton.Size = new System.Drawing.Size(85, 35);
-            this.unlockButton.TabIndex = 0;
-            this.unlockButton.Text = "button1";
-            this.unlockButton.UseVisualStyleBackColor = true;
-            this.unlockButton.Click += new System.EventHandler(this.button1_Click);
+            unlockButton.Location = new System.Drawing.Point(352, 78);
+            unlockButton.Name = "unlockButton";
+            unlockButton.Size = new System.Drawing.Size(85, 35);
+            unlockButton.TabIndex = 0;
+            unlockButton.Text = "button1";
+            unlockButton.UseVisualStyleBackColor = true;
+            unlockButton.Click += button1_Click;
             // 
             // LockedLabel
             // 
-            this.LockedLabel.Font = new System.Drawing.Font("Georgia", 48F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.LockedLabel.Location = new System.Drawing.Point(3, 3);
-            this.LockedLabel.Name = "LockedLabel";
-            this.LockedLabel.Size = new System.Drawing.Size(594, 75);
-            this.LockedLabel.TabIndex = 1;
-            this.LockedLabel.Text = "label1";
-            this.LockedLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.LockedLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.LockedLabel_Paint);
+            LockedLabel.Font = new System.Drawing.Font("Georgia", 48F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            LockedLabel.Location = new System.Drawing.Point(3, 3);
+            LockedLabel.Name = "LockedLabel";
+            LockedLabel.Size = new System.Drawing.Size(594, 75);
+            LockedLabel.TabIndex = 1;
+            LockedLabel.Text = "label1";
+            LockedLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            LockedLabel.Paint += LockedLabel_Paint;
             // 
             // pincode
             // 
-            this.pincode.Font = new System.Drawing.Font("Arial Rounded MT Bold", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.pincode.Location = new System.Drawing.Point(123, 78);
-            this.pincode.Name = "pincode";
-            this.pincode.Size = new System.Drawing.Size(223, 35);
-            this.pincode.TabIndex = 2;
-            this.pincode.UseSystemPasswordChar = true;
-            this.pincode.TextChanged += new System.EventHandler(this.pincode_TextChanged);
-            this.pincode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.pincode_KeyPress);
+            pincode.Font = new System.Drawing.Font("Arial Rounded MT Bold", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            pincode.Location = new System.Drawing.Point(123, 78);
+            pincode.Name = "pincode";
+            pincode.Size = new System.Drawing.Size(223, 35);
+            pincode.TabIndex = 2;
+            pincode.UseSystemPasswordChar = true;
+            pincode.TextChanged += pincode_TextChanged;
+            pincode.KeyPress += pincode_KeyPress;
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.LockedLabel);
-            this.panel1.Controls.Add(this.pincode);
-            this.panel1.Controls.Add(this.unlockButton);
-            this.panel1.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.panel1.Location = new System.Drawing.Point(104, 58);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(600, 127);
-            this.panel1.TabIndex = 3;
+            panel1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            panel1.Controls.Add(ErrorLabel);
+            panel1.Controls.Add(LockedLabel);
+            panel1.Controls.Add(pincode);
+            panel1.Controls.Add(unlockButton);
+            panel1.ForeColor = System.Drawing.SystemColors.ControlText;
+            panel1.Location = new System.Drawing.Point(104, 58);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(600, 177);
+            panel1.TabIndex = 3;
+            // 
+            // ErrorLabel
+            // 
+            ErrorLabel.AutoSize = true;
+            ErrorLabel.Font = new System.Drawing.Font("Georgia", 18F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            ErrorLabel.ForeColor = System.Drawing.Color.Red;
+            ErrorLabel.Location = new System.Drawing.Point(260, 127);
+            ErrorLabel.Name = "ErrorLabel";
+            ErrorLabel.Size = new System.Drawing.Size(75, 29);
+            ErrorLabel.TabIndex = 3;
+            ErrorLabel.Text = "label1";
             // 
             // ScreenLockerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.panel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.KeyPreview = true;
-            this.MinimizeBox = false;
-            this.Name = "ScreenLockerForm";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "ScreenLockerForm";
-            this.TopMost = true;
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ScreenLockerForm_FormClosing);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.ScreenLockerForm_Paint);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ScreenLockerForm_KeyDown);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            ClientSize = new System.Drawing.Size(800, 450);
+            Controls.Add(panel1);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            KeyPreview = true;
+            MinimizeBox = false;
+            Name = "ScreenLockerForm";
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "ScreenLockerForm";
+            TopMost = true;
+            WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            FormClosing += ScreenLockerForm_FormClosing;
+            Paint += ScreenLockerForm_Paint;
+            KeyDown += ScreenLockerForm_KeyDown;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -114,5 +124,6 @@
         private System.Windows.Forms.Label LockedLabel;
         private System.Windows.Forms.TextBox pincode;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label ErrorLabel;
     }
 }

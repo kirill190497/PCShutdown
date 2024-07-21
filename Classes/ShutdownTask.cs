@@ -4,9 +4,9 @@ using System.Reflection;
 
 namespace PCShutdown.Classes
 {
-    internal class ShutdownTask
+    public class ShutdownTask
     {
-        public enum TaskType { ShutdownPC, RebootPC, Lock, Unlock, Sleep, Hibernaiton, Notification, Cancel, ScreenOff, ScreenOn, PressSpace, None}
+        public enum TaskType { ShutdownPC, RebootPC, Lock, Unlock, Sleep, Hibernaiton, Notification, Cancel, ScreenOff, ScreenOn, PressSpace, MediaPause, MediaNext, MediaPrev, VolumeMute, VolumeUp, VolumeDown, None }
         public DateTime Date { get; set; }
         public int ID { get; set; }
         public TaskType Type { get; set; }

@@ -8,7 +8,9 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Collections.Generic;
+
 using System.IO;
+using Windows.AI.MachineLearning;
 
 namespace PCShutdown.Classes.TelegramBot
 {
@@ -27,18 +29,37 @@ namespace PCShutdown.Classes.TelegramBot
             var keyboard = new ReplyKeyboardMarkup(rows);
             return keyboard;
         }
-        private static ReplyKeyboardMarkup MainKeyboard()
+        private static IReplyMarkup MainKeyboard()
         {
-            var rows = new List<List<KeyboardButton>> 
+            var rows = new List<List<KeyboardButton>>();
+
+            var menu = Properties.Settings.Default.TelegramMenu;
+
+            foreach (var row in menu) 
             {
+                var k_row = new List<KeyboardButton>();
+                foreach (var item in row)
+                {
+                    k_row.Add(new KeyboardButton(item));
+                }
+                rows.Add(k_row);
+            }
+            /* {
                 new() { new("Lock"), new("Unlock") },
-                new() { new("Space") },
+                new() { new("Screenshot") },
                 new() { new("Sleep"), new("Shutdown") },
                 new() { new("Cancel") }
-            };
-            
+            };*/
+            IReplyMarkup keyboard;
+            if (rows.Count != 0)
+            {
+                keyboard = new ReplyKeyboardMarkup(rows);
+            }
+            else
+            {
+                keyboard = new ReplyKeyboardRemove();
+            }
 
-            var keyboard = new ReplyKeyboardMarkup(rows);
             return keyboard;
         }
 
@@ -61,13 +82,14 @@ namespace PCShutdown.Classes.TelegramBot
                         _ = await botClient.SendTextMessageAsync(message.Chat, "Menu", replyMarkup: MainKeyboard());
                         return;
                     }
-                    if (message.Text.ToLower() == "/screenshot")
+                    if (message.Text.ToLower() == "/screenshot" || message.Text == "Screenshot")
                     {
                         //_ = await botClient.SendTextMessageAsync(message.Chat, Screenshot.Save(), cancellationToken: cancellationToken);
                         var path = Screenshot.Save();
                         var file = System.IO.File.Open(path, FileMode.Open);
                         var filename = path.Split("\\")[^1];
-                        _ = await botClient.SendDocumentAsync(message.Chat, new Telegram.Bot.Types.InputFiles.InputOnlineFile(file, filename), caption: filename);
+                        
+                        _ = await botClient.SendDocumentAsync(message.Chat, new InputFileStream(file, filename), caption: filename);
                         file.Close();
                         Screenshot.DeleteFile();
                         return;
@@ -84,10 +106,16 @@ namespace PCShutdown.Classes.TelegramBot
 
                         return;
                     }
-                    if (message.Text == "Space")
+                    if (message.Text == "Pause")
                     {
                         _ = await botClient.SendTextMessageAsync(message.Chat, "Команда отправлена");
-                        Server.AddTask(ShutdownTask.TaskType.PressSpace, DateTime.Now, "space");
+                        Server.AddTask(ShutdownTask.TaskType.MediaPause, DateTime.Now);
+                        return;
+                    }
+                    if (message.Text == "Mute")
+                    {
+                        _ = await botClient.SendTextMessageAsync(message.Chat, "Команда отправлена");
+                        Server.AddTask(ShutdownTask.TaskType.VolumeMute, DateTime.Now);
                         return;
                     }
                     if (message.Text == "Sleep")
@@ -120,25 +148,30 @@ namespace PCShutdown.Classes.TelegramBot
                         Server.AddTask(ShutdownTask.TaskType.Cancel, DateTime.Now, "Cancel tasks");
                         return;
                     }
+                    if (message.ReplyToMessage != null)
+                    {
+                        if (message.ReplyToMessage.Text == "Lock pin (numbers)")
+                        {
+                            _ = await botClient.SendTextMessageAsync(message.Chat, "Pin: " + message.Text, replyMarkup: MainKeyboard());
+                            Server.AddTask(ShutdownTask.TaskType.Lock, DateTime.Now, message.Text);
+                            return;
+                        }
+                        if (message.ReplyToMessage.Text == "Unlock pin (numbers)")
+                        {
+                            _ = await botClient.SendTextMessageAsync(message.Chat, "Pin: " + message.Text, replyMarkup: MainKeyboard());
+                            Server.AddTask(ShutdownTask.TaskType.Unlock, DateTime.Now, message.Text);
+                            return;
+                        }
+                    }
                     
-                    if (message.ReplyToMessage.Text == "Lock pin (numbers)")
-                    {
-                        _ = await botClient.SendTextMessageAsync(message.Chat, "Pin: " + message.Text, replyMarkup: MainKeyboard());
-                        Server.AddTask(ShutdownTask.TaskType.Lock, DateTime.Now, message.Text);
-                        return;
-                    }
-                    if (message.ReplyToMessage.Text == "Unlock pin (numbers)")
-                    {
-                        _ = await botClient.SendTextMessageAsync(message.Chat, "Pin: " + message.Text, replyMarkup: MainKeyboard());
-                        Server.AddTask(ShutdownTask.TaskType.Unlock, DateTime.Now, message.Text);
-                        return;
-                    }
 
                 }
                 else
                 {
-                    _ = await botClient.SendTextMessageAsync(Properties.Settings.Default.TelegramAdmin, $"От: {message.Chat.FirstName} {message.Chat.LastName} ({message.Chat.Username}) \n{message.Text}", replyMarkup: MainKeyboard());
-                    _ = await botClient.SendTextMessageAsync(message.Chat, "You have no access!");
+
+                    _ = await botClient.ForwardMessageAsync(Properties.Settings.Default.TelegramAdmin, message.Chat, message.MessageId);
+                    // _ = await botClient.SendTextMessageAsync(Properties.Settings.Default.TelegramAdmin, $"От: {message.Chat.FirstName} {message.Chat.LastName} ({message.Chat.Username}) \n{message.Text}", replyMarkup: MainKeyboard());
+                    //_ = await botClient.SendTextMessageAsync(message.Chat, "You have no access!");
                     return;
                 }
 

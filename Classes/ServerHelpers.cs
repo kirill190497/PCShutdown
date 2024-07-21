@@ -2,7 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-
+using System.Management;
+using static PCShutdown.Classes.Shortcut;
 internal static partial class ServerHelpers
 {
     private const int WmSyscommand = 0x0112;
@@ -27,6 +28,8 @@ internal static partial class ServerHelpers
     public static extern int GetWindowText(IntPtr hwnd, StringBuilder ss, int count);
 
     [DllImport("user32.dll")]
+    public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
+    [DllImport("user32.dll")]
     public static extern bool LockWorkStation();
     [DllImport("user32.dll")]
     public static extern IntPtr SendMessage(
@@ -35,22 +38,55 @@ internal static partial class ServerHelpers
         IntPtr wParam,
         IntPtr lParam
     );
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    [DllImport("user32.dll")]
+    static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
     [DllImport("user32.dll")]
     public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
     [DllImport("PowrProf.dll")]
     public static extern bool SetSuspendState(bool bHibernate);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool GetDevicePowerState(IntPtr handle, out bool state);
+    [DllImport("kernel32.dll")]
+    static extern uint GetLastError();
+
 
     public static void TurnOffDisplay()
     {
-        PostMessage((IntPtr)HwndBroadcast, (uint)WmSyscommand,
+        SendMessage((IntPtr)HwndBroadcast, (uint)WmSyscommand,
                 (IntPtr)ScMonitorpower, (IntPtr)MonitorShutoff);
     }
 
     public static void TurnOnDisplay()
     {
-        PostMessage((IntPtr)HwndBroadcast, (uint)WmSyscommand,
+        SendMessage((IntPtr)HwndBroadcast, (uint)WmSyscommand,
                 (IntPtr)ScMonitorpower, (IntPtr)MonitorTurnOn);
         mouse_event(0x0001, 1,1, uint.MinValue, IntPtr.Zero);
+    }
+
+    public static object GetMonitorState()
+    {
+
+        var query = "select * from WmiMonitorID";
+        object isActive = false;
+        using (var wmiSearcher = new ManagementObjectSearcher("\\root\\wmi", query))
+        {
+            var results = wmiSearcher.Get();
+            
+            foreach (ManagementObject wmiObj in results)
+            {
+                // get the "Active" property and cast to a boolean, which should 
+                // tell us if the display is active. I've interpreted this to mean "on"
+                
+                
+                isActive = wmiObj["Active"];
+                //MessageBox.Show(isActive.ToString());
+            }
+        }
+        return isActive;
     }
 
     public static void EmulateKeyClick(Keys key, bool broadcast = true)
@@ -65,4 +101,20 @@ internal static partial class ServerHelpers
         PostMessage(hwnd, KeyDown, (IntPtr)key, IntPtr.Zero);
 
     }
+
+
+    public const int KEYEVENTF_EXTENTEDKEY = 1;
+    public const int KEYEVENTF_KEYUP = 0;
+    public const int VK_MEDIA_NEXT_TRACK = 0xB0;
+    public const int VK_MEDIA_PLAY_PAUSE = 0xB3;
+    public const int VK_MEDIA_PREV_TRACK = 0xB1;
+    public static void MediaKeyEmulate(Keys key)
+    {
+        keybd_event((byte)key, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);    // Play/Pause
+
+        //keybd_event(VK_MEDIA_PREV_TRACK, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);  // PrevTrack
+        //keybd_event(VK_MEDIA_NEXT_TRACK, 0, KEYEVENTF_EXTENTEDKEY, IntPtr.Zero);  // NextTrack
+    }
+
+     
 }

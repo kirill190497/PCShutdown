@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net;
@@ -18,8 +19,6 @@ namespace PCShutdown.Classes
             {
                 var h = new HttpClient();
                 
-
-                
                 var r = new HttpRequestMessage(HttpMethod.Get, $"{Url}?{Data}");
                 r.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
                 r.Headers.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("pcshutdown")));
@@ -28,22 +27,10 @@ namespace PCShutdown.Classes
                 
                 return await h.SendAsync(r).Result.Content.ReadAsStringAsync();
 
-                
-                /*WebRequest req = WebRequest.Create(Url + "?" + Data);
-                req.Method = "GET";
-                req.ContentType = "application/x-www-form-urlencoded";
-                WebResponse resp = req.GetResponse();
-                Stream stream = resp.GetResponseStream();
-                StreamReader sr = new StreamReader(stream);
-                string Out = sr.ReadToEnd();
-                sr.Close();
-                return Out;*/
             }
             catch (HttpRequestException ex)
             {
-                //StreamReader sr = new StreamReader(ex.Response.GetResponseStream());
-
-                //MainWindow.Instance.addLog(string.Format(Lang.RequestError,Url,Data), save: true, color: "Red");
+                
                 return ex.Message;
             }
 
@@ -75,18 +62,20 @@ namespace PCShutdown.Classes
         {
             using (var client = new HttpClient())
             {
-                using (var s = client.GetStreamAsync(url))
+                using (var s = await client.GetStreamAsync(url))
                 {
                     using (var fs = new FileStream(path, FileMode.OpenOrCreate))
                     {
-                        s.Result.CopyTo(fs);
+                        s.CopyTo(fs);
                     }
                 }
             }
         }
 
+        
         public static string POST(string Url, string Data)
         {
+    
             WebRequest req = WebRequest.Create(Url);
             req.Method = "POST";
             req.Timeout = 100000;

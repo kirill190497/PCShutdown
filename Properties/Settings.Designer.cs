@@ -12,7 +12,7 @@ namespace PCShutdown.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -164,6 +164,41 @@ namespace PCShutdown.Properties {
             }
             set {
                 this["TelegramAdmin"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.Collections.Generic.List<System.String>> TelegramMenu {
+            get {
+                return ((global::System.Collections.Generic.List<System.Collections.Generic.List<System.String>>)(this["TelegramMenu"]));
+            }
+            set {
+                this["TelegramMenu"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("one@ScreenOff;two@ScreenOn;three@MediaPause;")]
+        public string AlexStarTVInputs {
+            get {
+                return ((string)(this["AlexStarTVInputs"]));
+            }
+            set {
+                this["AlexStarTVInputs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AdvancedSettings {
+            get {
+                return ((bool)(this["AdvancedSettings"]));
+            }
+            set {
+                this["AdvancedSettings"] = value;
             }
         }
     }

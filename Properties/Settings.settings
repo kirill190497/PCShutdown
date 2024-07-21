@@ -38,5 +38,14 @@
     <Setting Name="TelegramAdmin" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="TelegramMenu" Type="System.Collections.Generic.List&lt;System.Collections.Generic.List&lt;System.String&gt;&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="AlexStarTVInputs" Type="System.String" Scope="User">
+      <Value Profile="(Default)">one@ScreenOff;two@ScreenOn;three@MediaPause;</Value>
+    </Setting>
+    <Setting Name="AdvancedSettings" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

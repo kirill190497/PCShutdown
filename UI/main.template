@@ -23,31 +23,106 @@
     </div>
   <button type="button" id="send"  class="btn btn-success">{{strings.SendButton}}</button>
   <button type="button" id="cancel"  class="btn btn-warning">{{strings.CancelTasks}}</button>
+	<label for="volume_level" id="label_volume" class="form-label">Volume: </label>
+	<input type="range" class="form-range" min="0" max="100" id="volume_level" value="">
+
+
+		<button type="button" id="media_volume_mute"  class="btn  btn-lg">
+			<img src="mute.png">
+		</button>
+
+	<div class="btn-group btn-group-lg" role="group" aria-label="Media">
+		<button type="button" id="media_volume_level"  class="btn btn-outline-success btn-lg" disabled=""></button>
+		<button type="button" id="media_prev"  class="btn btn-outline-success btn-lg">
+			<img src="previous.png">
+		</button>
+		<button type="button" id="media_pause"  class="btn btn-outline-success btn-lg">
+			<img src="play.png">
+			<img src="pause.png">
+		</button>		
+		<button type="button" id="media_next"  class="btn btn-outline-success btn-lg">
+			<img src="next.png">
+		</button>
+		<button type="button" id="media_volume_level"  class="btn btn-outline-success btn-lg" disabled=""></button>
+	</div>
 </form>
 
 <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
 
 <script>
-  $( document ).ready(function() {
-  var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-  var date = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
-  //var date = new Date().toISOString();
-  var today = date.slice(0, date.lastIndexOf(":") );
-  console.log( date);
-  $("#date").val(today);
-  $("#date").attr( 'min',today);
+	$( document ).ready(function() {
+	var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+	var date = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+	//var date = new Date().toISOString();
+	var today = date.slice(0, date.lastIndexOf(":") );
+	console.log( date);
+	$("#date").val(today);
+	$("#date").attr( 'min',today);
+	$.get( "/?&password={{password}}&message=test&value={value}&response=json", function( data ) {
+	$( ".result" ).html( data );
+	var json = JSON.parse(data);
+	var volume = JSON.parse(json.value);
 
-  });
-  $("#cancel").on("click", function() {
-  shutdown_action("cancel", "{{password}}", "{{strings.CancelTasks}}", 0);
-  });
+	$("#volume_level").val(volume.level)
+	$("#label_volume").text('Volume: ' + volume.level)
 
-  $("#send").on("click", function() {
 
-  var action = $( "#action option:selected" ).val();
-  var message = $("#message").val();
-  var date =  new Date( $("#date").val()).getTime();
+	if (volume.mute){
+	$("#media_volume_mute").addClass('btn-danger').removeClass('btn-outline-danger');
+	$("#label_volume").text("Muted");
+	}
+	else{$("#media_volume_mute").addClass('btn-outline-danger').removeClass('btn-danger');}
+	});
 
-  shutdown_action(action, "{{password}}", message, date);
-  });
+	});
+	$("#cancel").on("click", function() {
+	shutdown_action("cancel", "{{password}}", "{{strings.CancelTasks}}", 0);
+	});
+
+	$("#media_pause").on("click", function() {
+	shutdown_action("media_pause", "{{password}}", "Pause", 0);
+	});
+
+	$("#media_next").on("click", function() {
+	shutdown_action("media_next", "{{password}}", "Next", 0);
+	});
+
+	$("#media_prev").on("click", function() {
+	shutdown_action("media_prev", "{{password}}", "Previous", 0);
+	});
+
+	$("#media_volume_mute").on("click", function() {
+	var val = 1;
+	var txt = $("#label_volume").text();
+	if (txt == "Muted"){val=0}
+	$.get( "/?action=alexstar_mute&password={{password}}&message=test&value="+val, function( data ) {
+	$( ".result" ).html( data );
+	location.reload();
+	});
+	//shutdown_action("media_volume_mute", "{{password}}", "Mute", 0);
+	});
+
+
+
+	$("#volume_level").on("change", function() {
+	var date =  new Date( $("#date").val()).getTime();
+	var val = $("#volume_level").val();
+	$.get( "/?action=alexstar_volume&password={{password}}&message=test&value="+val, function( data ) {
+	$( ".result" ).html( data );
+	location.reload();
+	});
+
+	
+	});
+
+
+
+	$("#send").on("click", function() {
+
+	var action = $( "#action option:selected" ).val();
+	var message = $("#message").val();
+	var date =  new Date( $("#date").val()).getTime();
+
+	shutdown_action(action, "{{password}}", message, date);
+	});
 </script>

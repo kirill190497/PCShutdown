@@ -39,9 +39,9 @@ namespace PCShutdown.Forms
                 WorkDirPath.Text = Directory.GetCurrentDirectory();
             }
             ApplyTranslation();
-            
+
             advancedGroup.Enabled = AdvancedSettings;
-            
+
         }
 
         public ConfigForm()
@@ -55,7 +55,7 @@ namespace PCShutdown.Forms
             InitializeComponent();
             this.AdvancedSettings = AdvancedSettings;
             InitForm();
-            
+
         }
         private void ApplyTranslation()
         {
@@ -78,6 +78,7 @@ namespace PCShutdown.Forms
             checkMac.Text = S.CheckMAC;
             passwordCheck.Text = S.CheckPassword;
             pin_label.Text = S.PinLabel;
+            EditTelegramMenu.Text = S.EditTelegramMenu;
         }
         private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -92,12 +93,12 @@ namespace PCShutdown.Forms
         private void LoadLanguages()
         {
             string workpath = Settings.Default.WorkPath;
-            var files = Glob.Files(Path.Combine(workpath, @"Lang/"),"*.json");
+            var files = Glob.Files(Path.Combine(workpath, @"Lang/"), "*.json");
 
-            
+
             foreach (var file in files)
             {
-                
+
                 try
                 {
                     var filepath = Path.Combine(workpath, @"Lang", file);
@@ -107,10 +108,10 @@ namespace PCShutdown.Forms
                 }
                 catch (Exception)
                 {
-                   throw new ApplicationException(message: "Failed to load translation file \"" + file + "\"");
+                    throw new ApplicationException(message: "Failed to load translation file \"" + file + "\"");
                 }
             }
-            
+
         }
 
         private void delayValue_KeyPress(object sender, KeyPressEventArgs e)
@@ -160,11 +161,11 @@ namespace PCShutdown.Forms
                 {
                     need_restart = true;
                 }
-                
+
             }
             Settings.Default.Save();
             this.Hide();
-            string text = string.Format("{0}: {1}\n{2}: {3}\n{4}\n{5}: {6}\n{7}: {8}", 
+            string text = string.Format("{0}: {1}\n{2}: {3}\n{4}\n{5}: {6}\n{7}: {8}",
                 S.AutorunLabel, autorun.Checked ? S.On : S.Off, S.CheckPassword, // {0} {1}
                 passwordCheck.Checked ? S.Yes : S.No, // {2} {3}
                 passwordCheck.Checked ? S.PasswordLabel + ": " + password.Text : "", // {4}
@@ -172,7 +173,8 @@ namespace PCShutdown.Forms
                 S.WorkingPath, WorkDirPath.Text); // {7} {8}
             ShutdownApp.ShowToast(text, S.SettingsSaved);
 
-            if(need_restart) {
+            if (need_restart)
+            {
                 System.Diagnostics.Process.Start(Application.ExecutablePath);
                 Environment.Exit(0);
             }
@@ -243,6 +245,16 @@ namespace PCShutdown.Forms
             {
                 e.Handled = true;
             }
+        }
+
+        private void ConfigForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void EditTelegramMenu_Click(object sender, EventArgs e)
+        {
+            ShutdownApp.Forms.ShowForm(typeof(TelegramMenuForm));
         }
     }
 }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
@@ -11,14 +14,37 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
+using AudioSwitcher.AudioApi.CoreAudio;
+using Windows.Networking.BackgroundTransfer;
+using AudioSwitcher.AudioApi;
+using System.Security.AccessControl;
 
 namespace PCShutdown.Classes
 {
-
-    class Server
+    partial class Server
     {
+        private class Volume
+        {
+            public int Level { get; set; }
+            public bool Mute { get; set; }
+        }
 
+        private class Args
+        {
+            public string Text { get; set; }
+            public bool Success { get; set; }
+            public string Password { get; set; }
+            //public string Mode { get; set; }
+            public string Alert_Type { get; set; }
+            public string Button { get; set; }
+            public string Script { get; set; }
+            public string TemplateName { get; set; }
+            public string Volume_Level {  get; set; }
+            public object Value { get; set; }
 
+            
+        }
 
         public static int localPort = Properties.Settings.Default.ServerPort;
         private static bool Running = false;
@@ -130,7 +156,7 @@ namespace PCShutdown.Classes
                 Application.Exit();
             }
 
-            
+
 
             while (Running)
             {
@@ -158,125 +184,327 @@ namespace PCShutdown.Classes
                     time = request.QueryString.Get("time") == null ? 0 : long.Parse(request.QueryString.Get("time"));
                     string password_arg = password != null ? "?password=" + password : "";
                     ShutdownTask.TaskType actionType;
-                    List<Tuple<string, string>> args = new();
+                    //List<Tuple<string, object>> args = new();
+                    Args args;
+
                     if (action == null && (password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck))
                     {
-                        args.Clear();
-                        args.Add(new("text", ShutdownApp.Translation.Lang.Strings.ActionNotSet));
-                        args.Add(new("password", password));
-                        answer = ParseTemplate("main", args, responseMode);
+                        Volume volume = new()
+                        {
+                            Level = Convert.ToInt32(AudioManager.GetMasterVolume()),
+                            Mute = AudioManager.GetMasterVolumeMute()
+                        };
+                        args = new()
+                        {
+                            Text = ShutdownApp.Translation.Lang.Strings.ActionNotSet,
+                            Password = password,
+                            TemplateName = "main",
+
+                            Value = JsonConvert.SerializeObject(volume),
+                        };
+
                     }
                     else if (password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck || action == "handshake")
                     {
                         if (!Properties.Settings.Default.CheckMAC || GetHardwareAddress().Contains(hardwareAddress))
                         {
 
-                            _ = request.QueryString.Get("delay") == null ? delay : Convert.ToInt32(request.QueryString.Get("delay"));
+                            //_ = request.QueryString.Get("delay") == null ? delay : Convert.ToInt32(request.QueryString.Get("delay"));
+                            if (action.StartsWith("alexstar")) responseMode = "json";
                             switch (action)
                             {
+                                case "alexstar_input":
+                                    string sr = "";
+                                    foreach (var s in request.QueryString.AllKeys)
+                                    {
+                                       sr += s + " - " + request.QueryString.Get(s) + "\n";
+                                    }
+                                    message = sr;
+                                    //MessageBox.Show(sr);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Alert_Type = "success",
+                                        TemplateName = "alert",
+                                        Value =  request.QueryString.Get("value") == "{value}" ? ServerHelpers.GetMonitorState() : request.QueryString.Get("value")
 
+                                    };
+
+                                    actionType = AlexstarHook.GetCommandByInput(request.QueryString.Get("value"));
+                                   
+                                    break;
+                                case "alexstar_mute":
+                                    /*string sr = "";
+                                    foreach (var s in request.QueryString.AllKeys)
+                                    {
+                                        sr += s + " - " + request.QueryString.Get(s) + "\n";
+                                    }
+                                    message = sr;*/
+                                    //MessageBox.Show(sr);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Alert_Type = "success",
+                                        TemplateName = "alert",
+                                        Value = AudioManager.GetMasterVolumeMute()
+
+                                    };
+                                    var mute = request.QueryString.Get("value");
+                                    if (mute != null && mute != "{value}")
+                                    {
+                                        
+                                        AudioManager.SetMasterVolumeMute(Convert.ToBoolean(Convert.ToInt32(mute)));
+                                    }
+                                    actionType = ShutdownTask.TaskType.None;
+                                    
+                                    break;
+                                case "alexstar_volume":
+                                    /*string sr = "";
+                                    foreach (var s in request.QueryString.AllKeys)
+                                    {
+                                        sr += s + " - " + request.QueryString.Get(s) + "\n";
+                                    }
+                                    message = sr;*/
+                                    //MessageBox.Show(sr);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Alert_Type = "success",
+                                        TemplateName = "alert",
+                                        Value = Convert.ToInt32(AudioManager.GetMasterVolume())
+
+                                    };
+
+                                    var vol = request.QueryString.Get("value");
+                                    if (vol != null && vol != "{value}")
+                                    {
+                                       
+                                        AudioManager.SetMasterVolume(Convert.ToSingle(vol));
+                                    }
+                                    actionType = ShutdownTask.TaskType.None;
+                                    break;
                                 case "lock":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.LockScreen));
-                                    args.Add(new("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Back + "</button>"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.LockScreen,
+                                        Button = "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Back + "</button>",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.Lock;
                                     break;
                                 case "unlock":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.LockScreen));
-                                    args.Add(new("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Back + "</button>"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.UnlockScreen,
+                                        Button = "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Back + "</button>",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.Unlock;
                                     break;
                                 case "reboot":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.RebootPC));
-                                    args.Add(new("button", "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.RebootPC,
+                                        Button = "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.RebootPC;
                                     break;
                                 case "shutdown":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.ShutdownPC));
-                                    args.Add(new("button", "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.ShutdownPC,
+                                        Button = "<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.ShutdownPC;
                                     break;
                                 case "sleep":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.Sleep));
-                                    args.Add(new("button", "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.Sleep,
+                                        Button = "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.Sleep;
                                     break;
                                 case "hibernate":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.Hibernation));
-                                    args.Add(new("button", "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>-->"));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.Hibernation,
+                                        Button = "<!--<button type='button' class='btn btn-primary'onclick='shutdown_action(`cancel`, `" + password + "`)'>" + ShutdownApp.Translation.Lang.Strings.CancelTasks + "</button>-->",
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.Hibernaiton;
                                     break;
                                 case "cancel":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.CancelTasks));
-                                    args.Add(new("password", password_arg));
-                                    answer = ParseTemplate("redirect", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.CancelTasks,
+                                        Password = password_arg,
+                                        Success = true,
+                                        TemplateName = "redirect"
+                                    };
                                     actionType = ShutdownTask.TaskType.Cancel;
                                     break;
                                 case "notification":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.Notification));
-                                    args.Add(new("password", password_arg));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("redirect", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.Notification,
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "redirect"
+                                    };
                                     actionType = ShutdownTask.TaskType.Notification;
                                     break;
                                 case "screenoff":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.CommandDone));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.CommandDone,
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.ScreenOff;
                                     break;
                                 case "screenon":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.CommandDone));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.CommandDone,
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.ScreenOn;
                                     break;
                                 case "press_space":
-                                    args.Clear();
                                     StringBuilder ss = new(256);
                                     _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
-                                    args.Add(new("text", ss.ToString()));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
                                     actionType = ShutdownTask.TaskType.PressSpace;
                                     break;
+                                case "media_pause":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.MediaPause;
+                                    break;
+                                case "media_next":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.MediaNext;
+                                    break;
+                                case "media_prev":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.MediaPrev;
+                                    break;
+                                case "media_volume_mute":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.VolumeMute;
+                                    break;
+                                case "media_volume_up":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.VolumeUp;
+                                    break;
+                                case "media_volume_down":
+                                    ss = new(256);
+                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Text = ss.ToString(),
+                                        Password = password_arg,
+                                        Alert_Type = "success",
+                                        TemplateName = "redirect"
+                                    };
+                                    actionType = ShutdownTask.TaskType.VolumeDown;
+                                    break;
                                 case "handshake":
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.CommandDone));
-                                    args.Add(new("alert_type", "success"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.CommandDone,
+                                        Success = true,
+                                        Value = true,
+                                        Alert_Type = "success",
+                                        TemplateName = "alert"
+                                    };
+                                    responseMode = "json";
                                     actionType = ShutdownTask.TaskType.None;
                                     break;
 
 
                                 default:
-                                    args.Clear();
-                                    args.Add(new("text", ShutdownApp.Translation.Lang.Strings.ActionNotSet));
-                                    args.Add(new("password", password_arg));
-                                    args.Add(new("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Home + "</button>"));
-                                    args.Add(new("alert_type", "danger"));
-                                    answer = ParseTemplate("alert", args, responseMode);
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.ActionNotSet,
+                                        Password = password_arg,
+                                        Success = false,
+                                        Button = "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Home + "</button>",
+                                        Alert_Type = "danger",
+                                        TemplateName = "alert"
+                                    };
                                     actionType = ShutdownTask.TaskType.None;
                                     break;
                             }
@@ -290,37 +518,71 @@ namespace PCShutdown.Classes
                         }
                         else
                         {
-                            args.Clear();
-                            args.Add(new Tuple<string, string>("text", ShutdownApp.Translation.Lang.Strings.WrongMac));
-                            args.Add(new Tuple<string, string>("password", password_arg));
-                            args.Add(new Tuple<string, string>("button", "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>"+ ShutdownApp.Translation.Lang.Strings.Home+"</button>"));
-                            args.Add(new Tuple<string, string>("alert_type", "danger"));
-                            answer = ParseTemplate("alert", args, responseMode);
+                            args = new()
+                            {
+                                Text = ShutdownApp.Translation.Lang.Strings.WrongMac,
+                                Password = password_arg,
+                                Success = false,
+                                Button = "<button type='button' class='btn btn-primary'onclick='window.location.replace(`/" + password_arg + "`)'>" + ShutdownApp.Translation.Lang.Strings.Home + "</button>",
+                                Alert_Type = "danger",
+                                TemplateName = "alert"
+                            };
                         }
 
 
                     }
                     else
                     {
-                        args.Clear();
-                        args.Add(new Tuple<string, string>("text", ShutdownApp.Translation.Lang.Strings.WrongPassword));
-                        args.Add(new Tuple<string, string>("button", "<div class='input-group mb-3'><input type='password' class='form-control' placeholder='"+ ShutdownApp.Translation.Lang.Strings.EnterPassword+ "' aria-label='"+ ShutdownApp.Translation.Lang.Strings.EnterPassword+ "' id='password' aria-describedby='button-addon2'><button class='btn btn-outline-secondary' onclick='enter_password()' type='button' id='button-addon2'>"+ ShutdownApp.Translation.Lang.Strings.SendButton+ "</button></div>"));
-                        args.Add(new Tuple<string, string>("script", "<script type='text/javascript'>function enter_password(){input = document.getElementById('password');  window.location.replace('/?password='+input.value); }</script>"));
-                        args.Add(new Tuple<string, string>("alert_type", "danger"));
-                        answer = ParseTemplate("alert", args, responseMode);
+                        args = new()
+                        {
+                            Text = ShutdownApp.Translation.Lang.Strings.WrongPassword,
+                            Success = false,
+                            Button = "<div class='input-group mb-3'><input type='password' class='form-control' placeholder='" + ShutdownApp.Translation.Lang.Strings.EnterPassword + "' aria-label='" + ShutdownApp.Translation.Lang.Strings.EnterPassword + "' id='password' aria-describedby='button-addon2'><button class='btn btn-outline-secondary' onclick='enter_password()' type='button' id='button-addon2'>" + ShutdownApp.Translation.Lang.Strings.SendButton + "</button></div>",
+                            Script = "<script type='text/javascript'>function enter_password(){input = document.getElementById('password');  window.location.replace('/?password='+input.value); }</script>",
+                            Alert_Type = "danger",
+                            TemplateName = "alert"
+                        };
                     }
 
 
+
+                    answer = ParseTemplate(args, responseMode);
                     string responseString = answer;
                     byte[] buffer = Encoding.UTF8.GetBytes(responseString);
-                    response.ContentLength64 = buffer.Length;
                     response.Headers = new WebHeaderCollection
                     {
                         "Content-Type:text/html;charset=UTF-8"
                     };
-                    Stream output = response.OutputStream;
-                    output.Write(buffer, 0, buffer.Length);
-                    output.Close();
+                    if (request.RawUrl.EndsWith(".ico") || request.RawUrl.EndsWith(".png"))
+                    {
+                        string workpath = Properties.Settings.Default.WorkPath;
+                        buffer = File.ReadAllBytes(Path.Combine(workpath, @"UI/images" + request.RawUrl));
+                        var header = "Content-Type:image/" + request.RawUrl.Split('.')[^1] + ";charset=UTF-8";
+                        response.Headers = new WebHeaderCollection
+                        {
+
+                            header
+                        };
+
+
+                    }
+                    
+                    response.ContentLength64 = buffer.Length;
+                    try 
+                    {
+                        Stream output = response.OutputStream;
+                        output.Write(buffer, 0, buffer.Length);
+                        
+                    } 
+                    catch (Exception)
+                    {
+                        
+                    }
+                    finally
+                    {
+                        response.Close();
+                    }
+                   
 
 
 
@@ -332,7 +594,7 @@ namespace PCShutdown.Classes
             }
         }
 
-        private static string ParseErrorTemplate(int code, string message, string trace, string source, params object[] args)
+        private static string ParseErrorTemplate(int code, string message, string trace, string source)
         {
             string html = "<!DOCTYPE html>\r\n<html>\r\n    <head>\r\n        <meta http-equiv = 'Content-Type' content = 'text/html; charset=utf-8'> \r\n        <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor' crossorigin='anonymous'>\r\n        <title> PCShutdown</title>\r\n    </head>\r\n    <body>\r\n    <div class=\"container\">\r\n        {{body}}\r\n    </div>\r\n\r\n    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js' integrity='sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2' crossorigin='anonymous'></script>\r\n    </body>\r\n    </html> ";
 
@@ -345,20 +607,34 @@ namespace PCShutdown.Classes
             return html;
         }
 
-        private static string ParseTemplate(string name, List<Tuple<string, string>> args, string mode = default)
+        public static IDictionary<string, object> GetValues(object obj)
+        {
+            return obj
+                    .GetType()
+                    .GetProperties()
+                    .ToDictionary(p => p.Name.ToLower(), p => p.GetValue(obj)) ;
+        }
+
+        private static string ParseTemplate(Args args, string mode = default)
         {
             try
             {
                 string workpath = Properties.Settings.Default.WorkPath;
 
                 string base_template = File.ReadAllText(Path.Combine(workpath, @"UI/base.template"));
-                string template = File.ReadAllText(Path.Combine(workpath, @"UI/" + name + ".template"));
-                //string template = "";
+                string template = File.ReadAllText(Path.Combine(workpath, @"UI/" + args.TemplateName + ".template"));
+               
 
-                foreach (Tuple<string, string> arg in args)
-                {
-                    template = template.Replace("{{" + arg.Item1 + "}}", arg.Item2);
+                var kvp = GetValues(args);
+                foreach ( var arg in kvp) {
+                    if (arg.Value != null)
+                    {
+                        template = template.Replace("{{" + arg.Key.ToLower() + "}}", arg.Value.ToString());
+                    }
+                    
                 }
+
+              
                 Type t = ShutdownApp.Translation.Lang.Strings.GetType();
                 PropertyInfo[] props = t.GetProperties();
                 foreach (var prop in props)
@@ -366,16 +642,29 @@ namespace PCShutdown.Classes
                     template = template.Replace("{{strings."+prop.Name+"}}", prop.GetValue(ShutdownApp.Translation.Lang.Strings).ToString());//  
                 }
 
+
+
                 //Regex rg = new Regex("/{/{/w+/}/}");
-                template = Regex.Replace(template, @"\{\{(\w+)\}\}", "");
+                template = TemplaterRegex().Replace(template, "");
                 Console.Write(mode);
+                var serialier_settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+                if (mode == "json")
+                {
+                    args.Button = null;
+                    args.Script = null;
+                    args.TemplateName = null;
+                }
+
+                var rendered_template = base_template.Replace("{{body}}", template);
                 return mode switch
                 {
-                    "text" => args[0].Item2,
-                    "json" => "{\"" + args[0].Item1 + "\":\"" + args[0].Item2 + "\"}",
-                    "html" => base_template.Replace("{{body}}", template),
-                    _ => base_template.Replace("{{body}}", template),
-                };
+                    "text" => args.Text,
+                    "json" => JsonConvert.SerializeObject(args, serialier_settings).ToLower(),//"{\"" + args[1].Item1 + "\":\"" + args[1].Item2 + "\"}",
+                    _ => rendered_template,
+                }; 
             }
             catch (Exception exception)
             {
@@ -384,7 +673,7 @@ namespace PCShutdown.Classes
 
         }
 
-        private static async void ShowNotification(string message, string attrib)
+        private static async void ShowNotification(string message, string attrib="")
         {
             await Task.Run(() => { ShutdownApp.ShowToast(message, attrib); });
 
@@ -398,7 +687,7 @@ namespace PCShutdown.Classes
             string args = default;
             string baloon_text = default;
             string attrib_text = default;
-            string pin = default;
+            string pin;
             switch (command)
             {
 
@@ -460,6 +749,36 @@ namespace PCShutdown.Classes
                     
                     ServerHelpers.EmulateKeyClick(Keys.Space, false);  
                     break;
+                case ShutdownTask.TaskType.MediaPause:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.MediaPlayPause);
+                    break;
+                case ShutdownTask.TaskType.MediaNext:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.MediaNextTrack);
+                    break;
+                case ShutdownTask.TaskType.MediaPrev:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.MediaPreviousTrack);
+                    break;
+                case ShutdownTask.TaskType.VolumeMute:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.VolumeMute);
+                    break;
+                case ShutdownTask.TaskType.VolumeUp:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.VolumeUp);
+                    break;
+                case ShutdownTask.TaskType.VolumeDown:
+                    baloon_text = message;
+
+                    ServerHelpers.MediaKeyEmulate(Keys.VolumeDown);
+                    break;
                 default:
                     baloon_text = ShutdownApp.Translation.Lang.Strings.WrongCommand;
                     args = default;
@@ -489,9 +808,9 @@ namespace PCShutdown.Classes
 
             foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
-                PhysicalAddress if_mac = default;
-                string if_name = default;
-                string if_desc = default;
+                PhysicalAddress if_mac;
+                string if_name;
+                string if_desc;
 
                 if (item.OperationalStatus == OperationalStatus.Up && (item.NetworkInterfaceType == NetworkInterfaceType.Ethernet || item.NetworkInterfaceType == NetworkInterfaceType.Wireless80211))
                 {
@@ -546,8 +865,8 @@ namespace PCShutdown.Classes
             }
         }
 
-
-
+        [GeneratedRegex("\\{\\{(\\w+)\\}\\}")]
+        private static partial Regex TemplaterRegex();
     }
 
     class ServerNetworkInterface

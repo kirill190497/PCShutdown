@@ -44,7 +44,7 @@ namespace PCShutdown.Classes
 
         public static void ParseUrl(string url) 
         {
-            Regex r = new Regex(@"^(?<proto>\w+)://(?<cmd>\w+)?/(?<action>\w+)",
+            Regex r = new(@"^(?<proto>\w+)://(?<cmd>\w+)?/(?<action>\w+)",
                           RegexOptions.None, TimeSpan.FromMilliseconds(150));
             Match m = r.Match(url);
             if (m.Success)

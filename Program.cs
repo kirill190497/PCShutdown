@@ -12,6 +12,7 @@ using PCShutdown.Properties;
 using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
+using Newtonsoft.Json;
 
 namespace PCShutdown
 {
@@ -85,7 +86,7 @@ namespace PCShutdown
             var lv = Application.ProductVersion.Split(".");
             bool update = false;
 
-
+            
             if (int.Parse(rv[0]) > int.Parse(lv[0]))
             {
                 update = true;
@@ -100,7 +101,7 @@ namespace PCShutdown
             }
             // {major}.{minor}.{patch}
 
-
+            
             if (update)
             {
                 var res = MessageBox.Show("New update available! Download now?", "PCShutdown: Update available", MessageBoxButtons.YesNo);
@@ -122,11 +123,13 @@ namespace PCShutdown
         static void Main(string[] args)
         {
             CheckUpdates();
+#if !DEBUG
             UrlProtocol.Register();
             if (args.Length != 0)
             {
                 UrlProtocol.ParseUrl(args[0]);
             }
+#endif
             Application.ThreadException +=
                 new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -205,19 +208,14 @@ namespace PCShutdown
         static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
             Exception exception = e.Exception;
-            string message = exception.Message;
-            string stacktrace = exception.StackTrace;
-            string source = exception.Source;
-            if (exception.InnerException != null)
-            {
-                message = exception.InnerException.Message;
-                stacktrace = exception.InnerException.StackTrace;
-                source = exception.InnerException.Source;
-            }
+            
 
             //string body = message + "\n" + stacktrace + "\n" + source;
 
-            MessageBox.Show(message, "Application error!");
+            var json = JsonConvert.SerializeObject(exception, Formatting.Indented);
+            MessageBox.Show(json);
+
+            File.AppendAllText(Path.Combine(Settings.Default.WorkPath, @"crash.log"), json + Environment.NewLine);
 
 
 

@@ -40,6 +40,7 @@ namespace PCShutdown.Classes
         public string ShutdownPC { get; set; }
         public string RebootPC { get; set; }
         public string LockScreen { get; set; }
+        public string UnlockScreen { get; set; }
         public string Hibernation { get; set; }
         public string Sleep { get; set; }
         public string Tasks { get; set; }
@@ -97,6 +98,10 @@ namespace PCShutdown.Classes
         public string SetDifferentTime { get; set; }
         public string AdvancedSettings { get; set;}
         public string Shortcuts { get; set; }
+        public string ScreenLocked { get ; set; }
+        public string EnterPinLabel { get; set; }
+        public string UnlockButton { get; set; }
+        public string EditTelegramMenu { get; set; }
     }
     class Lang
     {
