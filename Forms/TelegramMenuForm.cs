@@ -39,7 +39,13 @@ namespace PCShutdown.Forms
 
         private void LoadMenu() 
         {
-            var menu = Properties.Settings.Default.TelegramMenu;
+            List<List<string>> menu;
+            if (Properties.Settings.Default.TelegramMenu.Count == 0)
+            {
+                menu = new List<List<string>>();
+            }
+            else
+            menu = Properties.Settings.Default.TelegramMenu;
             for (var j = 0; j < menu.Count; j++)
             {
                 for (var i = 0; i < menu[j].Count; i++)
