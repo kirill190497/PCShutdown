@@ -28,15 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
             AddRow = new System.Windows.Forms.Button();
             ColsCount = new System.Windows.Forms.NumericUpDown();
-            bindingSource1 = new System.Windows.Forms.BindingSource(components);
             menu_lst = new System.Windows.Forms.GroupBox();
             saveMenu = new System.Windows.Forms.Button();
             loadDefault = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)ColsCount).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)bindingSource1).BeginInit();
             SuspendLayout();
             // 
             // AddRow
@@ -103,7 +100,6 @@
             Text = "TelegramMenuForm";
             Load += TelegramMenuForm_Load;
             ((System.ComponentModel.ISupportInitialize)ColsCount).EndInit();
-            ((System.ComponentModel.ISupportInitialize)bindingSource1).EndInit();
             ResumeLayout(false);
         }
 
@@ -111,7 +107,6 @@
 
         private System.Windows.Forms.Button AddRow;
         private System.Windows.Forms.NumericUpDown ColsCount;
-        private System.Windows.Forms.BindingSource bindingSource1;
         private System.Windows.Forms.GroupBox menu_lst;
         private System.Windows.Forms.Button saveMenu;
         private System.Windows.Forms.Button loadDefault;

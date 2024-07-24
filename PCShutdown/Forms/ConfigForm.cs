@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Collections.Generic;
 
 using System.Linq;
+using BlueMystic;
 
 namespace PCShutdown.Forms
 {
@@ -21,10 +22,12 @@ namespace PCShutdown.Forms
         private bool AdvancedSettings { get; set; }
         private void InitForm()
         {
+            if (Cfg.DarkMode)
+                _ = new DarkModeCS(this);
             this.Icon = Icon.FromHandle(Resource.settings.GetHicon());
             WorkDirPath.Text = Cfg.WorkPath;
             delayValue.Text = Cfg.Delay.ToString();
-
+            darkTheme.Checked = Cfg.DarkMode;
             autorun.Checked = Cfg.Autorun;
             passwordCheck.Checked = Cfg.PasswordCheck;
             password.Text = Cfg.Password;
@@ -48,8 +51,9 @@ namespace PCShutdown.Forms
 
         public ConfigForm()
         {
+            
             InitializeComponent();
-            this.AdvancedSettings = false;
+            
             InitForm();
         }
         public ConfigForm(bool AdvancedSettings)
@@ -133,7 +137,7 @@ namespace PCShutdown.Forms
             Cfg.CheckMAC = checkMac.Checked;
             Cfg.UnlockPin = int.Parse(unlock_pin.Text);
             Cfg.ServerPort = Convert.ToInt32(ServerPort.Text);
-
+            Cfg.DarkMode = darkTheme.Checked;
             if (Cfg.TelegramAdmin != Convert.ToInt32(TelegramAdmin.Text) || Cfg.TelegramBotToken != TelegramBotToken.Text)
             {
                  need_restart = true;

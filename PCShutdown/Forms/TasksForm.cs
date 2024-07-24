@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using BlueMystic;
 using PCShutdown.Classes;
 
 namespace PCShutdown.Forms
@@ -11,7 +12,8 @@ namespace PCShutdown.Forms
         public TasksForm()
         {
             InitializeComponent();
-            
+            if (ShutdownApp.Cfg.DarkMode)
+                _ = new DarkModeCS(this);
             this.Icon = Icon.FromHandle(Resource.tasks.GetHicon());
 
             ApplyTranslation();

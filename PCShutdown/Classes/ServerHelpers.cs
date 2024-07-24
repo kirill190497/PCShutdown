@@ -16,6 +16,11 @@ internal static partial class ServerHelpers
     private const uint SysKeyDown = 0x0104;
     private const uint SysKeyUp = 0x0105;
 
+    [DllImport("uxtheme.dll", EntryPoint = "#135", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern int SetPreferredAppMode(int preferredAppMode);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#136", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void FlushMenuThemes();
     [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
     public static extern bool SetWindowPos(int hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
@@ -147,6 +152,8 @@ internal static partial class ServerHelpers
             }
         }
     }
+
+   
 
 
 }

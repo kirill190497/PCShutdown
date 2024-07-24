@@ -55,6 +55,7 @@ namespace PCShutdown.Forms
             label1 = new System.Windows.Forms.Label();
             PortLabel = new System.Windows.Forms.Label();
             ServerPort = new System.Windows.Forms.TextBox();
+            darkTheme = new System.Windows.Forms.CheckBox();
             advancedGroup.SuspendLayout();
             tgGroup.SuspendLayout();
             SuspendLayout();
@@ -140,7 +141,7 @@ namespace PCShutdown.Forms
             // 
             // WorkDirPath
             // 
-            WorkDirPath.Location = new System.Drawing.Point(13, 420);
+            WorkDirPath.Location = new System.Drawing.Point(12, 438);
             WorkDirPath.Name = "WorkDirPath";
             WorkDirPath.ReadOnly = true;
             WorkDirPath.Size = new System.Drawing.Size(254, 23);
@@ -149,7 +150,7 @@ namespace PCShutdown.Forms
             // 
             // browse
             // 
-            browse.Location = new System.Drawing.Point(278, 420);
+            browse.Location = new System.Drawing.Point(277, 437);
             browse.Name = "browse";
             browse.Size = new System.Drawing.Size(75, 23);
             browse.TabIndex = 10;
@@ -201,7 +202,7 @@ namespace PCShutdown.Forms
             // Language
             // 
             Language.FormattingEnabled = true;
-            Language.Location = new System.Drawing.Point(110, 144);
+            Language.Location = new System.Drawing.Point(110, 173);
             Language.Name = "Language";
             Language.Size = new System.Drawing.Size(242, 23);
             Language.TabIndex = 15;
@@ -209,7 +210,7 @@ namespace PCShutdown.Forms
             // LangLabel
             // 
             LangLabel.AutoSize = true;
-            LangLabel.Location = new System.Drawing.Point(15, 147);
+            LangLabel.Location = new System.Drawing.Point(15, 176);
             LangLabel.Name = "LangLabel";
             LangLabel.Size = new System.Drawing.Size(34, 15);
             LangLabel.TabIndex = 16;
@@ -224,9 +225,9 @@ namespace PCShutdown.Forms
             advancedGroup.Controls.Add(unlock_pin);
             advancedGroup.Controls.Add(showPin);
             advancedGroup.Enabled = false;
-            advancedGroup.Location = new System.Drawing.Point(15, 173);
+            advancedGroup.Location = new System.Drawing.Point(12, 225);
             advancedGroup.Name = "advancedGroup";
-            advancedGroup.Size = new System.Drawing.Size(337, 241);
+            advancedGroup.Size = new System.Drawing.Size(337, 206);
             advancedGroup.TabIndex = 17;
             advancedGroup.TabStop = false;
             advancedGroup.Text = "groupBox1";
@@ -306,12 +307,23 @@ namespace PCShutdown.Forms
             ServerPort.TabIndex = 17;
             ServerPort.KeyPress += textBox1_KeyPress;
             // 
+            // darkTheme
+            // 
+            darkTheme.AutoSize = true;
+            darkTheme.Location = new System.Drawing.Point(15, 144);
+            darkTheme.Name = "darkTheme";
+            darkTheme.Size = new System.Drawing.Size(96, 19);
+            darkTheme.TabIndex = 18;
+            darkTheme.Text = "Тёмная тема";
+            darkTheme.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             ClientSize = new System.Drawing.Size(364, 501);
+            Controls.Add(darkTheme);
             Controls.Add(advancedGroup);
             Controls.Add(LangLabel);
             Controls.Add(Language);
@@ -368,5 +380,6 @@ namespace PCShutdown.Forms
         private System.Windows.Forms.TextBox TelegramAdmin;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button EditTelegramMenu;
+        private System.Windows.Forms.CheckBox darkTheme;
     }
 }

@@ -26,7 +26,7 @@ namespace PCShutdown.Classes
         public Dictionary<string, string> AlexStarTVInputs {  get; set; }
         public List<List<string>> TelegramMenu { get; set; }
         public  bool AdvancedSettings { get; set; }
-
+        public bool DarkMode { get; set; }
 
         public static bool CheckConfig()
         {
@@ -65,6 +65,7 @@ namespace PCShutdown.Classes
                    }
                
                 });
+                obj["DarkMode"] = true;
                 var asi = obj["AlexStarTVInputs"].ToString().Split(";");
                 var d = new Dictionary<string, string>();
                 foreach (var item in asi)

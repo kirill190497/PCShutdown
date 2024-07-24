@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BlueMystic;
 using Newtonsoft.Json;
 using PCShutdown.Classes;
 
@@ -33,6 +34,8 @@ namespace PCShutdown.Forms
         {
 
             InitializeComponent();
+            if (ShutdownApp.Cfg.DarkMode)
+                _ = new DarkModeCS(this);
             ApplyTranslation();
             LoadMenu();
 

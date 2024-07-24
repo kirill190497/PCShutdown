@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PCShutdown.Classes.TelegramBot;
 using System.Collections.Generic;
+using BlueMystic;
 
 namespace PCShutdown.Classes
 {
 
     internal class ShutdownApp
     {
+        
         public static Config Cfg = Program.Cfg;
         static NotifyIcon tray = new();
         ContextMenuStrip menu = new();
@@ -21,14 +23,22 @@ namespace PCShutdown.Classes
         public static FormsManager Forms = new();
         public static Form GlobalForm;
         
-        
         int delay = Cfg.Delay;
         public void Start()
         {
+
+           
+
             GlobalForm = new()
             {
                 WindowState = FormWindowState.Minimized
             };
+            if (Cfg.DarkMode)
+            {
+                var d = new DarkModeCS(GlobalForm);
+                d.ThemeControl(menu);
+            }
+            
             GlobalForm.Show();
             GlobalForm.Hide();
             ToastNotificationManagerCompat.History.Clear();

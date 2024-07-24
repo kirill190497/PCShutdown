@@ -1,4 +1,5 @@
-﻿using PCShutdown.Classes;
+﻿using BlueMystic;
+using PCShutdown.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,6 +26,7 @@ namespace PCShutdown.Forms
             this.TransparencyKey = Color.AliceBlue;
 
             InitializeComponent();
+            
             Locker = new ScreenLocker(pin);
             Pin = pin;
             var bounds = Screen.PrimaryScreen.Bounds;

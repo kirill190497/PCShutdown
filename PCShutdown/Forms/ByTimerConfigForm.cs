@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using BlueMystic;
 using PCShutdown.Classes;
 
 namespace PCShutdown.Forms
@@ -13,6 +14,7 @@ namespace PCShutdown.Forms
         {
             InitializeComponent();
             ApplyTranslation();
+            _ = new DarkModeCS(this);
             Icon = Icon.FromHandle(Resource.hourglass.GetHicon());
             command.Items.AddRange(new object[] { S.ShutdownPC, S.RebootPC, S.Sleep, S.Hibernation, S.LockScreen, S.Notification, S.TurnOffScreen, S.TurnOnScreen });
             period.Items.AddRange(new object[] { S.Minutes, S.Hours});

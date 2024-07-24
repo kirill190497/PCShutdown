@@ -201,7 +201,7 @@ namespace PCShutdown
 
                 ShutdownApp app = new();
                 app.Start();
-
+               
                 Application.Run();
             }
         }

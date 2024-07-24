@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using BlueMystic;
 using PCShutdown.Classes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -12,7 +13,8 @@ namespace PCShutdown.Forms
         public InTimeConfigForm()
         {
             InitializeComponent();
-            
+            if (ShutdownApp.Cfg.DarkMode)
+                _ = new DarkModeCS(this);
             Icon = Icon.FromHandle(Resource.timer.GetHicon());
             command.Items.AddRange(new object[] { S.ShutdownPC, S.RebootPC, S.Sleep, S.Hibernation, S.LockScreen, S.Notification, S.TurnOffScreen, S.TurnOnScreen });
             command.SelectedIndex = 0;
