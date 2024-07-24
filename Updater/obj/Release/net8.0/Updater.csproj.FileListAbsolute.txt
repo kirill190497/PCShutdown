@@ -1,0 +1,16 @@
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Updater.exe
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Updater.deps.json
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Updater.runtimeconfig.json
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Updater.dll
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Glob.dll
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.csproj.AssemblyReference.cache
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.GeneratedMSBuildEditorConfig.editorconfig
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.AssemblyInfoInputs.cache
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.AssemblyInfo.cs
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.csproj.CoreCompileInputs.cache
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.csproj.CopyComplete
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.dll
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\refint\Updater.dll
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\Updater.genruntimeconfig.cache
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\ref\Updater.dll
+D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\Newtonsoft.Json.dll
