@@ -14,16 +14,17 @@ namespace PCShutdown.Classes
 
     internal class ShutdownApp
     {
+        public static Config Cfg = Program.Cfg;
         static NotifyIcon tray = new();
         ContextMenuStrip menu = new();
-        public static Translation Translation = new(Properties.Settings.Default.Language);
+        public static Translation Translation = new(Cfg.Language);
         public static FormsManager Forms = new();
         public static Form GlobalForm;
-
-        int delay = Properties.Settings.Default.Delay;
+        
+        
+        int delay = Cfg.Delay;
         public void Start()
         {
-            
             GlobalForm = new()
             {
                 WindowState = FormWindowState.Minimized
@@ -31,7 +32,7 @@ namespace PCShutdown.Classes
             GlobalForm.Show();
             GlobalForm.Hide();
             ToastNotificationManagerCompat.History.Clear();
-            if (Properties.Settings.Default.TelegramBotToken != "" & Properties.Settings.Default.TelegramAdmin != 0) 
+            if (Cfg.TelegramBotToken != "" & Cfg.TelegramAdmin != 0) 
             {
                  ShutdownTelegramBot.Run();
             }
@@ -126,7 +127,7 @@ namespace PCShutdown.Classes
         {
             var net_if = Server.GetInterfaceByIP(sender.ToString());
 
-            string url = "http://" + net_if.IPv4 + ":" + Server.localPort + "/?password=" + Properties.Settings.Default.Password + "&hwid=" + net_if.HardwareAddress;
+            string url = "http://" + net_if.IPv4 + ":" + Server.localPort + "/?password=" + ShutdownApp.Cfg.Password + "&hwid=" + net_if.HardwareAddress;
 
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }

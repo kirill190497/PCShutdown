@@ -8,15 +8,13 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Collections.Generic;
-
 using System.IO;
-using Windows.AI.MachineLearning;
 
 namespace PCShutdown.Classes.TelegramBot
 {
     internal class ShutdownTelegramBot
     {
-        static ITelegramBotClient bot = new TelegramBotClient(Properties.Settings.Default.TelegramBotToken);
+        static ITelegramBotClient bot = new TelegramBotClient(ShutdownApp.Cfg.TelegramBotToken);
 
         private static ReplyKeyboardMarkup YesNoAnswer(string action)
         {
@@ -33,7 +31,7 @@ namespace PCShutdown.Classes.TelegramBot
         {
             var rows = new List<List<KeyboardButton>>();
 
-            var menu = Properties.Settings.Default.TelegramMenu;
+            var menu = ShutdownApp.Cfg.TelegramMenu;
 
             foreach (var row in menu) 
             {
@@ -70,7 +68,7 @@ namespace PCShutdown.Classes.TelegramBot
             {
                 
                 var message = update.Message;
-                if (message.Chat.Id == Properties.Settings.Default.TelegramAdmin)
+                if (message.Chat.Id == ShutdownApp.Cfg.TelegramAdmin)
                 {
                     if (message.Text.ToLower() == "/start")
                     {
@@ -130,6 +128,12 @@ namespace PCShutdown.Classes.TelegramBot
 
                         return;
                     }
+                    if (message.Text == "Reboot")
+                    {
+                        _ = await botClient.SendTextMessageAsync(message.Chat, "Reboot PC?", replyMarkup: YesNoAnswer("Reboot PC!"));
+
+                        return;
+                    }
                     if (message.Text == "Sleep mode!")
                     {
                         _ = await botClient.SendTextMessageAsync(message.Chat, "Sleep mode!", replyMarkup: MainKeyboard());
@@ -140,6 +144,12 @@ namespace PCShutdown.Classes.TelegramBot
                     {
                         _ = await botClient.SendTextMessageAsync(message.Chat, "Shutdown PC!", replyMarkup: MainKeyboard());
                         Server.AddTask(ShutdownTask.TaskType.ShutdownPC, DateTime.Now, "Shutdown PC via Telegram");
+                        return;
+                    }
+                    if (message.Text == "Reboot PC!")
+                    {
+                        _ = await botClient.SendTextMessageAsync(message.Chat, "Reboot PC!", replyMarkup: MainKeyboard());
+                        Server.AddTask(ShutdownTask.TaskType.RebootPC, DateTime.Now, "Reboot PC via Telegram");
                         return;
                     }
                     if (message.Text == "Cancel")
@@ -169,9 +179,9 @@ namespace PCShutdown.Classes.TelegramBot
                 else
                 {
 
-                    _ = await botClient.ForwardMessageAsync(Properties.Settings.Default.TelegramAdmin, message.Chat, message.MessageId);
-                    // _ = await botClient.SendTextMessageAsync(Properties.Settings.Default.TelegramAdmin, $"От: {message.Chat.FirstName} {message.Chat.LastName} ({message.Chat.Username}) \n{message.Text}", replyMarkup: MainKeyboard());
-                    //_ = await botClient.SendTextMessageAsync(message.Chat, "You have no access!");
+                    _ = await botClient.ForwardMessageAsync(ShutdownApp.Cfg.TelegramAdmin, message.Chat, message.MessageId);
+                    // _ = await botClient.SendTextMessageAsync(ShutdownApp.Cfg.TelegramAdmin, $"От: {message.Chat.FirstName} {message.Chat.LastName} ({message.Chat.Username}) \n{message.Text}", replyMarkup: MainKeyboard());
+                    _ = await botClient.SendTextMessageAsync(message.Chat, "You have no access!");
                     return;
                 }
 

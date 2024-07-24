@@ -34,6 +34,7 @@
             bindingSource1 = new System.Windows.Forms.BindingSource(components);
             menu_lst = new System.Windows.Forms.GroupBox();
             saveMenu = new System.Windows.Forms.Button();
+            loadDefault = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)ColsCount).BeginInit();
             ((System.ComponentModel.ISupportInitialize)bindingSource1).BeginInit();
             SuspendLayout();
@@ -44,7 +45,7 @@
             AddRow.Name = "AddRow";
             AddRow.Size = new System.Drawing.Size(127, 23);
             AddRow.TabIndex = 0;
-            AddRow.Text = "button1";
+            AddRow.Text = "Add";
             AddRow.UseVisualStyleBackColor = true;
             AddRow.Click += AddRow_Click;
             // 
@@ -62,7 +63,7 @@
             // 
             menu_lst.Location = new System.Drawing.Point(12, 41);
             menu_lst.Name = "menu_lst";
-            menu_lst.Size = new System.Drawing.Size(381, 381);
+            menu_lst.Size = new System.Drawing.Size(381, 239);
             menu_lst.TabIndex = 2;
             menu_lst.TabStop = false;
             menu_lst.Text = "groupBox1";
@@ -77,11 +78,22 @@
             saveMenu.UseVisualStyleBackColor = true;
             saveMenu.Click += saveMenu_Click;
             // 
+            // loadDefault
+            // 
+            loadDefault.Location = new System.Drawing.Point(12, 478);
+            loadDefault.Name = "loadDefault";
+            loadDefault.Size = new System.Drawing.Size(93, 23);
+            loadDefault.TabIndex = 4;
+            loadDefault.Text = "Default";
+            loadDefault.UseVisualStyleBackColor = true;
+            loadDefault.Click += loadDefault_Click;
+            // 
             // TelegramMenuForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(405, 513);
+            Controls.Add(loadDefault);
             Controls.Add(saveMenu);
             Controls.Add(menu_lst);
             Controls.Add(ColsCount);
@@ -102,5 +114,6 @@
         private System.Windows.Forms.BindingSource bindingSource1;
         private System.Windows.Forms.GroupBox menu_lst;
         private System.Windows.Forms.Button saveMenu;
+        private System.Windows.Forms.Button loadDefault;
     }
 }

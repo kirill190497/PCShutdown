@@ -36,6 +36,7 @@ namespace PCShutdown.Classes
         public string ApplicationError { get; set; }
 
         public string RestartApp { get; set; }
+        public string RestartQuestion { get; set; }
         public string NetworkInterfaces { get; set; }
         public string ShutdownPC { get; set; }
         public string RebootPC { get; set; }
@@ -118,7 +119,7 @@ namespace PCShutdown.Classes
         public Lang Lang;
         public Translation(string lang) 
         {
-            var path = Path.Combine(Properties.Settings.Default.WorkPath, @"Lang", lang + ".json");
+            var path = Path.Combine(ShutdownApp.Cfg.WorkPath, @"Lang", lang + ".json");
 
             using (StreamReader file = File.OpenText(path))
             {

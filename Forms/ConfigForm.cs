@@ -7,7 +7,7 @@ using PCShutdown.Classes;
 using GlobExpressions;
 using System.Text.Json.Nodes;
 using System.Collections.Generic;
-using PCShutdown.Properties;
+
 using System.Linq;
 
 namespace PCShutdown.Forms
@@ -17,29 +17,31 @@ namespace PCShutdown.Forms
 
         public List<ComboBoxItem> LoadedLanguages = new List<ComboBoxItem>();
         private readonly Strings S = ShutdownApp.Translation.Lang.Strings;
+        private readonly Config Cfg = ShutdownApp.Cfg;
         private bool AdvancedSettings { get; set; }
         private void InitForm()
         {
             this.Icon = Icon.FromHandle(Resource.settings.GetHicon());
-            WorkDirPath.Text = Settings.Default.WorkPath;
-            delayValue.Text = Settings.Default.Delay.ToString();
+            WorkDirPath.Text = Cfg.WorkPath;
+            delayValue.Text = Cfg.Delay.ToString();
 
-            autorun.Checked = Settings.Default.Autorun;
-            passwordCheck.Checked = Settings.Default.PasswordCheck;
-            password.Text = Settings.Default.Password;
-            checkMac.Checked = Settings.Default.CheckMAC;
-            unlock_pin.Text = Settings.Default.UnlockPin;
-            TelegramBotToken.Text = Settings.Default.TelegramBotToken;
-            TelegramAdmin.Text = Settings.Default.TelegramAdmin.ToString();
-            ServerPort.Text = Settings.Default.ServerPort.ToString();
+            autorun.Checked = Cfg.Autorun;
+            passwordCheck.Checked = Cfg.PasswordCheck;
+            password.Text = Cfg.Password;
+            checkMac.Checked = Cfg.CheckMAC;
+            unlock_pin.Text = Cfg.UnlockPin.ToString();
+            TelegramBotToken.Text = Cfg.TelegramBotToken;
+            TelegramAdmin.Text = Cfg.TelegramAdmin.ToString();
+            ServerPort.Text = Cfg.ServerPort.ToString();
             LoadLanguages();
-            Language.SelectedItem = LoadedLanguages.Find(x => x.Value.Equals(Settings.Default.Language));
+            Language.SelectedItem = LoadedLanguages.Find(x => x.Value.Equals(Cfg.Language));
             if (WorkDirPath.Text == "")
             {
                 WorkDirPath.Text = Directory.GetCurrentDirectory();
             }
             ApplyTranslation();
-
+            if(Cfg.AdvancedSettings)
+                AdvancedSettings = Cfg.AdvancedSettings;
             advancedGroup.Enabled = AdvancedSettings;
 
         }
@@ -59,7 +61,7 @@ namespace PCShutdown.Forms
         }
         private void ApplyTranslation()
         {
-            this.Text = "PCShutdown - " + S.Settings;
+            this.Text = $"PCShutdown {Application.ProductVersion.Split("+")[0]} - " + S.Settings;
             if (AdvancedSettings)
             {
                 Text = "PCShutdown - " + S.AdvancedSettings;
@@ -82,17 +84,12 @@ namespace PCShutdown.Forms
         }
         private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            /*if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                Hide();
-                
-            }*/
+            
         }
 
         private void LoadLanguages()
         {
-            string workpath = Settings.Default.WorkPath;
+            string workpath = Cfg.WorkPath;
             var files = Glob.Files(Path.Combine(workpath, @"Lang/"), "*.json");
 
 
@@ -103,7 +100,7 @@ namespace PCShutdown.Forms
                 {
                     var filepath = Path.Combine(workpath, @"Lang", file);
                     var json = JsonNode.Parse(File.ReadAllText(filepath));
-                    LoadedLanguages.Add(new ComboBoxItem(json["name"].ToString() + " - " + file, json["short"].ToString(), json["strings"]["RestartApp"].ToString()));
+                    LoadedLanguages.Add(new ComboBoxItem(json["name"].ToString() + " - " + file, json["short"].ToString(), json["strings"]["RestartApp"].ToString(), json["strings"]["RestartQuestion"].ToString()));
                     Language.Items.Add(LoadedLanguages.Last());
                 }
                 catch (Exception)
@@ -118,7 +115,7 @@ namespace PCShutdown.Forms
         {
 
             char number = e.KeyChar;
-            if (!Char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
+            if (!char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
             {
                 e.Handled = true;
             }
@@ -128,17 +125,24 @@ namespace PCShutdown.Forms
         private void button1_Click(object sender, EventArgs e)
         {
             bool need_restart = false;
-            Settings.Default.Delay = Convert.ToInt32(delayValue.Text);
-            Settings.Default.Autorun = autorun.Checked;
-            Settings.Default.PasswordCheck = passwordCheck.Checked;
-            Settings.Default.Password = password.Text;
-            Settings.Default.TelegramBotToken = TelegramBotToken.Text;
-            Settings.Default.CheckMAC = checkMac.Checked;
-            Settings.Default.UnlockPin = unlock_pin.Text;
-            Settings.Default.ServerPort = Convert.ToInt32(ServerPort.Text);
-            Settings.Default.TelegramAdmin = Convert.ToInt32(TelegramAdmin.Text);
+            
+            Cfg.Delay = Convert.ToInt32(delayValue.Text);
+            Cfg.Autorun = autorun.Checked;
+            Cfg.PasswordCheck = passwordCheck.Checked;
+            Cfg.Password = password.Text;
+            Cfg.CheckMAC = checkMac.Checked;
+            Cfg.UnlockPin = int.Parse(unlock_pin.Text);
+            Cfg.ServerPort = Convert.ToInt32(ServerPort.Text);
+
+            if (Cfg.TelegramAdmin != Convert.ToInt32(TelegramAdmin.Text) || Cfg.TelegramBotToken != TelegramBotToken.Text)
+            {
+                 need_restart = true;
+            }
+
+            Cfg.TelegramAdmin = Convert.ToInt32(TelegramAdmin.Text);
+            Cfg.TelegramBotToken = TelegramBotToken.Text;
 #if !DEBUG
-            Settings.Default.WorkPath = WorkDirPath.Text;
+            Cfg.WorkPath = WorkDirPath.Text;
             RegistryKey cukey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
             if (autorun.Checked)
             {
@@ -152,19 +156,23 @@ namespace PCShutdown.Forms
             }
 #endif
             var lang = ((ComboBoxItem)Language.SelectedItem);
-            if (ShutdownApp.Translation.Lang.Short != lang.Value)
+            if (ShutdownApp.Translation.Lang.Short != lang.Value )
             {
-                Settings.Default.Language = lang.Value;
+                Cfg.Language = lang.Value;
 
-                var answer = MessageBox.Show(lang.Question, "Change language?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var answer = MessageBox.Show(lang.Question, lang.ShortQuestion, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (answer == DialogResult.Yes)
                 {
                     need_restart = true;
                 }
+                else
+                {
+                    need_restart = false;
+                }
 
             }
-            Settings.Default.Save();
-            this.Hide();
+            Cfg.Save();
+            Hide();
             string text = string.Format("{0}: {1}\n{2}: {3}\n{4}\n{5}: {6}\n{7}: {8}",
                 S.AutorunLabel, autorun.Checked ? S.On : S.Off, S.CheckPassword, // {0} {1}
                 passwordCheck.Checked ? S.Yes : S.No, // {2} {3}
@@ -227,7 +235,7 @@ namespace PCShutdown.Forms
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             char number = e.KeyChar;
-            if (!Char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
+            if (!char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
             {
                 e.Handled = true;
             }
@@ -241,10 +249,11 @@ namespace PCShutdown.Forms
         private void TelegramAdmin_KeyPress(object sender, KeyPressEventArgs e)
         {
             char number = e.KeyChar;
-            if (!Char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
+            if (!char.IsDigit(number) && number != 8 && number != 22) // цифры и клавиша BackSpace + CTRL_V
             {
                 e.Handled = true;
             }
+            
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)

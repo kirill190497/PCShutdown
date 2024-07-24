@@ -26,27 +26,12 @@ namespace PCShutdown.Classes
         public static ShutdownTask.TaskType GetCommandByInput(string value) 
         {
             ShutdownTask.TaskType actionType;
-            Dictionary<string, ShutdownTask.TaskType> dict = new();
+           
 
-            foreach (var i in Properties.Settings.Default.AlexStarTVInputs.Split(";"))
-            {
-                if (i != null && i != "")
-                {
-                    
-                    var s = i.Split('@');
-                    string key = s[0];
-                    
-                    ShutdownTask.TaskType valueType = (ShutdownTask.TaskType)Enum.Parse(typeof(ShutdownTask.TaskType), s[1]);
-
-                    dict.Add(key, valueType);
-                }
-                
-            }
-
-
+            //ShutdownTask.TaskType valueType = (ShutdownTask.TaskType)Enum.Parse(typeof(ShutdownTask.TaskType), s[1]);
             if (value != "{value}") 
             {
-                actionType = dict[value];
+                actionType = (ShutdownTask.TaskType)Enum.Parse(typeof(ShutdownTask.TaskType), ShutdownApp.Cfg.AlexStarTVInputs[value]);
             }
             else
             {

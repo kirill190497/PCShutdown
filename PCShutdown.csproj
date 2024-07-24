@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Win32Resource>D:\source\csharp\PCShutdown\icons.res</Win32Resource>
+    <Win32Resource>D:\source\csharp\PCShutdown\PCShutdown\icons.res</Win32Resource>
     <Version>1.0.1</Version>
   </PropertyGroup>
 
@@ -70,6 +70,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Lang\de.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Lang\en.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

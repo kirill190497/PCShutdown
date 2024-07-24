@@ -53,7 +53,7 @@ namespace PCShutdown.Classes
                 if (proto == "pcshutdown")
                 {
                     var action = m.Groups["action"].Value;
-                    Request.GET(@"http://127.0.0.1:"+Server.localPort, $"password={Properties.Settings.Default.Password}&action={action}");
+                    _ = Request.GET(@"http://127.0.0.1:" + Server.localPort, $"password={Program.Cfg.Password}&action={action}");
                    
                     Environment.Exit(0);
                 }

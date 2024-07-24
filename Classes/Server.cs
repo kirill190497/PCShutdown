@@ -46,7 +46,7 @@ namespace PCShutdown.Classes
             
         }
 
-        public static int localPort = Properties.Settings.Default.ServerPort;
+        public static int localPort = ShutdownApp.Cfg.ServerPort;
         private static bool Running = false;
 
         public static List<ShutdownTask> TaskList = new();
@@ -170,7 +170,7 @@ namespace PCShutdown.Classes
                 long time;
                 string responseMode;
                 string hardwareAddress;
-                int delay = Properties.Settings.Default.Delay;
+                int delay = ShutdownApp.Cfg.Delay;
 
 
 
@@ -187,7 +187,7 @@ namespace PCShutdown.Classes
                     //List<Tuple<string, object>> args = new();
                     Args args;
 
-                    if (action == null && (password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck))
+                    if (action == null && (password == ShutdownApp.Cfg.Password || !ShutdownApp.Cfg.PasswordCheck))
                     {
                         Volume volume = new()
                         {
@@ -204,9 +204,9 @@ namespace PCShutdown.Classes
                         };
 
                     }
-                    else if (password == Properties.Settings.Default.Password || !Properties.Settings.Default.PasswordCheck || action == "handshake")
+                    else if (password == ShutdownApp.Cfg.Password || !ShutdownApp.Cfg.PasswordCheck || action == "handshake")
                     {
-                        if (!Properties.Settings.Default.CheckMAC || GetHardwareAddress().Contains(hardwareAddress))
+                        if (!ShutdownApp.Cfg.CheckMAC || GetHardwareAddress().Contains(hardwareAddress))
                         {
 
                             //_ = request.QueryString.Get("delay") == null ? delay : Convert.ToInt32(request.QueryString.Get("delay"));
@@ -555,7 +555,7 @@ namespace PCShutdown.Classes
                     };
                     if (request.RawUrl.EndsWith(".ico") || request.RawUrl.EndsWith(".png"))
                     {
-                        string workpath = Properties.Settings.Default.WorkPath;
+                        string workpath = ShutdownApp.Cfg.WorkPath;
                         buffer = File.ReadAllBytes(Path.Combine(workpath, @"UI/images" + request.RawUrl));
                         var header = "Content-Type:image/" + request.RawUrl.Split('.')[^1] + ";charset=UTF-8";
                         response.Headers = new WebHeaderCollection
@@ -575,7 +575,7 @@ namespace PCShutdown.Classes
                         
                     } 
                     catch (Exception)
-                    {
+                    {  
                         
                     }
                     finally
@@ -619,7 +619,7 @@ namespace PCShutdown.Classes
         {
             try
             {
-                string workpath = Properties.Settings.Default.WorkPath;
+                string workpath = ShutdownApp.Cfg.WorkPath;
 
                 string base_template = File.ReadAllText(Path.Combine(workpath, @"UI/base.template"));
                 string template = File.ReadAllText(Path.Combine(workpath, @"UI/" + args.TemplateName + ".template"));
@@ -703,7 +703,7 @@ namespace PCShutdown.Classes
                     break;
                 case ShutdownTask.TaskType.Lock:
                     //baloon_text =  message;
-                    pin = Properties.Settings.Default.UnlockPin;
+                    pin = ShutdownApp.Cfg.UnlockPin.ToString();
                     if (message != "")
                         pin = message;
                     attrib_text = ShutdownApp.Translation.Lang.Strings.LockScreen;
@@ -711,7 +711,7 @@ namespace PCShutdown.Classes
                     break;
                 case ShutdownTask.TaskType.Unlock:
                     baloon_text = message;
-                    pin = Properties.Settings.Default.UnlockPin;
+                    pin = ShutdownApp.Cfg.UnlockPin.ToString();
                     if (message != "")
                         pin = message;
                     attrib_text = ShutdownApp.Translation.Lang.Strings.LockScreen;

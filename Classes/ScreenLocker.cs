@@ -23,7 +23,7 @@ namespace PCShutdown.Classes
             }
             catch 
             {
-                pinstr = Properties.Settings.Default.UnlockPin;
+                pinstr = ShutdownApp.Cfg.UnlockPin.ToString();
             }
             Length = pinstr.Length;
             Pin = new int[Length];

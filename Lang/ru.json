@@ -18,7 +18,8 @@
         "FirewallRulesAdded": "Исключения успешно добавлены, запуск приложения",
         "ErrorAddingFirewallRules": "Ошибка при добавлении правил брандмауэра. Повторите попытку.",
         "ApplicationError": "Ошибка приложения!",
-        "RestartApp": "Язык изменится после перезапуска приложения.",
+        "RestartApp": "Некоторые настройки изменятся после перезапуска приложения.",
+        "RestartQuestion": "Перезапустить сейчас?",
         "NetworkInterfaces": "Сетевые интерфейсы",
         "ShutdownPC": "Выключить компьютер",
         "RebootPC": "Перезагрузить компьютер",
@@ -84,6 +85,8 @@
         "ScreenLocked": "Экран зоблокирован!",
         "EnterPinLabel": "Введите PIN",
         "UnlockButton": "Разблокировать",
-        "EditTelegramMenu": "Изменить меню"
+        "EditTelegramMenu": "Изменить меню",
+        "AddButton": "Добавить",
+        "DefaultButton": "По умолчанию"
     }
 }

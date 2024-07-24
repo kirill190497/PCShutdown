@@ -1,18 +1,11 @@
-
-
 using PCShutdown.Classes;
-using System;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using PCShutdown.Properties;
-using System.Security.Policy;
-using System.Text.RegularExpressions;
-using System.IO.Compression;
 using Newtonsoft.Json;
+using System;
+using System.Threading;
+using System.IO;
 
 namespace PCShutdown
 {
@@ -23,7 +16,7 @@ namespace PCShutdown
         /// </summary>
         /// 
 
-
+        public static Config Cfg = Config.LoadConfig();
 
 
         static bool CheckFirewallRules()
@@ -54,26 +47,26 @@ namespace PCShutdown
 
                     if (firewall_output.Contains("PCShutdown"))
                     {
-                        Settings.Default.UrlAcl = true;
-                        Settings.Default.Save();
+                        Cfg.UrlAcl = true;
+                        Cfg.Save();
                     }
                     else
                     {
-                        Settings.Default.UrlAcl = false;
-                        Settings.Default.Save();
+                        Cfg.UrlAcl = false;
+                        Cfg.Save();
                     }
 
                 }
                 else
                 {
-                    Settings.Default.UrlAcl = false;
-                    Settings.Default.Save();
+                    Cfg.UrlAcl = false;
+                    Cfg.Save();
                 }
                 // Write the redirected output to this application's window.
 
 
                 process.WaitForExit();
-                return Settings.Default.UrlAcl;
+                return Cfg.UrlAcl;
             }
         }
 
@@ -108,11 +101,18 @@ namespace PCShutdown
                 if (res == DialogResult.Yes)
                 {
                     var file_url = remote["assets"][0]["browser_download_url"].ToString();
-                    var file_dest = Settings.Default.WorkPath + file_url.Split("/")[^1];
+                    var file_dest = Path.Combine(Cfg.WorkPath, file_url.Split("/")[^1]);
                     Request.SaveFile(file_url, file_dest);
-
-                    MessageBox.Show("File saved! Please unzip and replace files manualy!");
-                    Process.Start("explorer.exe", Settings.Default.WorkPath);
+                    while (true)
+                    {
+                        if (File.Exists(file_dest)) 
+                        {
+                            
+                            break;
+                        }
+                    }
+                    
+                    Process.Start(Path.Combine(Cfg.WorkPath, "Updater.exe"), Cfg.WorkPath);
                 }
             }
 
@@ -122,6 +122,7 @@ namespace PCShutdown
         [STAThread]
         static void Main(string[] args)
         {
+                       
             CheckUpdates();
 #if !DEBUG
             UrlProtocol.Register();
@@ -182,9 +183,9 @@ namespace PCShutdown
                 if (CheckFirewallRules())
                 {
 
-                    Settings.Default.UrlAcl = true;
+                    Cfg.UrlAcl = true;
 
-                    Settings.Default.Save();
+                    Cfg.Save();
                     MessageBox.Show(ShutdownApp.Translation.Lang.Strings.FirewallRulesAdded);
                 }
                 else
@@ -194,7 +195,7 @@ namespace PCShutdown
 
             }
 
-            if (Settings.Default.UrlAcl)
+            if (Cfg.UrlAcl)
             {
 
 
@@ -215,7 +216,7 @@ namespace PCShutdown
             var json = JsonConvert.SerializeObject(exception, Formatting.Indented);
             MessageBox.Show(json);
 
-            File.AppendAllText(Path.Combine(Settings.Default.WorkPath, @"crash.log"), json + Environment.NewLine);
+            File.AppendAllText(Path.Combine(Cfg.WorkPath, @"crash.log"), json + Environment.NewLine);
 
 
 

@@ -18,7 +18,8 @@
         "FirewallRulesAdded": "Exceptions added successfully, application launch",
         "ErrorAddingFirewallRules": "Error adding firewall rules. ",
         "ApplicationError": "Application error!",
-        "RestartApp": "The language will change after restarting the application.",
+        "RestartApp": "Some settings will change after restarting the application.",
+        "RestartQuestion": "Restart now?",
         "NetworkInterfaces": "Network interfaces",
         "ShutdownPC": "Shutdown PC",
         "RebootPC": "Restart PC",
@@ -84,7 +85,10 @@
         "ScreenLocked": "Screen locked!",
         "EnterPinLabel": "Enter PIN",
         "UnlockButton": "Unlock",
-        "EditTelegramMenu": "Edit menu"
+        "EditTelegramMenu": "Edit menu",
+        "AddButton": "Append",
+        "DefaultButton": "Default"
+
 
     }
 }

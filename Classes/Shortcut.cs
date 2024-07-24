@@ -28,6 +28,7 @@ namespace PCShutdown.Classes
                 string icon = app.Replace('\\', '/');
                 writer.WriteLine("IconFile=" + icon);
             }
+            ServerHelpers.RefreshWindowsExplorer();
         }
     }
 }

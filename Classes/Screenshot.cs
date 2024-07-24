@@ -30,7 +30,7 @@ namespace PCShutdown.Classes
                                         );
 
             // Save the screenshot to the specified path that the user has chosen.
-            var workpath = Properties.Settings.Default.WorkPath;
+            var workpath = ShutdownApp.Cfg.WorkPath;
             var path = Path.Combine(workpath, "screenshot.png");
             
             bmpScreenshot.Save(path, ImageFormat.Png);
@@ -39,7 +39,7 @@ namespace PCShutdown.Classes
         }
         
         public static void DeleteFile() {
-            var workpath = Properties.Settings.Default.WorkPath;
+            var workpath = ShutdownApp.Cfg.WorkPath;
             var path = Path.Combine(workpath, "screenshot.png");
             File.Delete(path);
         }

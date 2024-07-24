@@ -23,6 +23,7 @@ namespace PCShutdown.Forms
                     "Lock",
                     "Unlock",
                     "Sleep",
+                    "Reboot",
                     "Shutdown",
                     "Cancel",
                     "Pause",
@@ -37,15 +38,15 @@ namespace PCShutdown.Forms
 
         }
 
-        private void LoadMenu() 
+        private void LoadMenu()
         {
             List<List<string>> menu;
-            if (Properties.Settings.Default.TelegramMenu.Count == 0)
+            if (ShutdownApp.Cfg.TelegramMenu == null)
             {
                 menu = new List<List<string>>();
             }
             else
-            menu = Properties.Settings.Default.TelegramMenu;
+                menu = ShutdownApp.Cfg.TelegramMenu;
             for (var j = 0; j < menu.Count; j++)
             {
                 for (var i = 0; i < menu[j].Count; i++)
@@ -53,10 +54,10 @@ namespace PCShutdown.Forms
                     var item = new ComboBox();
                     item.Items.AddRange(Actions.ToArray());
                     item.SelectedText = menu[j][i];
-                    
+
                     item.Name = "it" + j + "_" + i;
-                   
-                    item.Location = new Point((item.Size.Width + 5) * i + 5, (item.Size.Height  + 5 )* j + 25);
+
+                    item.Location = new Point((item.Size.Width + 5) * i + 5, (item.Size.Height + 5) * j + 25);
                     menu_lst.Controls.Add(item);
                 }
             }
@@ -64,7 +65,8 @@ namespace PCShutdown.Forms
 
         private void ApplyTranslation()
         {
-            this.Text = S.Settings + " - Telegram " + S.EditTelegramMenu;
+            Text = S.Settings + " - Telegram " + S.EditTelegramMenu;
+            saveMenu.Text = S.SaveButton;
 
 
         }
@@ -74,22 +76,41 @@ namespace PCShutdown.Forms
 
         }
 
+        private void AddFilledRow(params string[] items)
+        {
+            if (items.Length > 0 && items.Length <= 3 )
+            {
+                for (var i = 0;i < items.Length;i++)
+                {
+                    var item = new ComboBox();
+                    item.Items.AddRange(Actions.ToArray());
+                    item.SelectedItem = items[i];
+
+                    item.Name = "it" + Rows + "_" + i;
+
+                    item.Location = new Point((item.Size.Width + 5) * i + 5, (item.Size.Height + 5) * Rows + 25);
+                    menu_lst.Controls.Add(item);
+                }
+                Rows++;
+            }
+        }
+
         private void AddRow_Click(object sender, EventArgs e)
         {
             if (Rows < 5)
             {
                 int cols = (int)ColsCount.Value;
-                
+
 
                 for (int i = 0; i < cols; i++)
                 {
                     var item = new ComboBox();
                     item.Items.AddRange(Actions.ToArray());
                     item.SelectedIndex = 0;
-                    
+
                     item.Name = "it" + Rows + "_" + i;
-                   
-                    item.Location = new Point((item.Size.Width + 5) * i + 5, (item.Size.Height  + 5 )* Rows + 25);
+
+                    item.Location = new Point((item.Size.Width + 5) * i + 5, (item.Size.Height + 5) * Rows + 25);
                     menu_lst.Controls.Add(item);
                 }
                 Rows++;
@@ -100,8 +121,9 @@ namespace PCShutdown.Forms
 
         private void saveMenu_Click(object sender, EventArgs e)
         {
-            string str = "";
             List<List<string>> rows = new();
+         
+
             for (int i = 0; i < Rows; i++)
             {
                 List<string> row = new List<string>();
@@ -109,18 +131,27 @@ namespace PCShutdown.Forms
                 {
                     var r = menu_lst.Controls.Find("it" + i + "_" + j, false).FirstOrDefault() as ComboBox;
                     if (r != null)
-                    row.Add(r.SelectedItem.ToString());
+                        row.Add(r.SelectedItem.ToString());
                 }
                 rows.Add(row);
-                    
+
             }
-            
-
-            Properties.Settings.Default.TelegramMenu = rows;
-
-            Properties.Settings.Default.Save();
 
 
+            ShutdownApp.Cfg.TelegramMenu = rows;
+
+            ShutdownApp.Cfg.Save();
+
+            Hide();
+        }
+
+        private void loadDefault_Click(object sender, EventArgs e)
+        {
+            menu_lst.Controls.Clear();
+            Rows = 0;
+            AddFilledRow("Pause", "Mute", "Screenshot");
+            AddFilledRow("Lock", "Unlock");
+            AddFilledRow("Shutdown", "Reboot", "Sleep");
         }
     }
 }

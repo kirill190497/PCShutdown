@@ -190,15 +190,12 @@ namespace PCShutdown.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AdvancedSettings {
             get {
                 return ((bool)(this["AdvancedSettings"]));
-            }
-            set {
-                this["AdvancedSettings"] = value;
             }
         }
     }
