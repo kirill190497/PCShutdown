@@ -12,5 +12,5 @@ D:\source\csharp\PCShutdown\Updater\obj\Debug\net8.0\Updater.genruntimeconfig.ca
 D:\source\csharp\PCShutdown\Updater\obj\Debug\net8.0\ref\Updater.dll
 D:\source\csharp\PCShutdown\Updater\bin\Debug\net8.0\Glob.dll
 D:\source\csharp\PCShutdown\Updater\obj\Debug\net8.0\Updater.csproj.AssemblyReference.cache
-D:\source\csharp\PCShutdown\Updater\obj\Debug\net8.0\Updater.csproj.CopyComplete
 D:\source\csharp\PCShutdown\Updater\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\source\csharp\PCShutdown\Updater\obj\Debug\net8.0\Updater.csproj.Up2Date

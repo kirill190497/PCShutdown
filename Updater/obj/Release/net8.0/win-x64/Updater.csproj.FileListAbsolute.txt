@@ -8,9 +8,9 @@ D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.Generated
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.AssemblyInfoInputs.cache
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.AssemblyInfo.cs
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.csproj.CoreCompileInputs.cache
-D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.csproj.CopyComplete
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.dll
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\refint\Updater.dll
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.genruntimeconfig.cache
 D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\ref\Updater.dll
 D:\source\csharp\PCShutdown\Updater\bin\Release\net8.0\win-x64\Newtonsoft.Json.dll
+D:\source\csharp\PCShutdown\Updater\obj\Release\net8.0\win-x64\Updater.csproj.Up2Date

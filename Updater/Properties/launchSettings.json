@@ -2,7 +2,7 @@
   "profiles": {
     "Updater": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\Progs\\PCShutdown"
+      "commandLineArgs": "D:\\Progs\\PCShutdown --force"
     }
   }
 }
