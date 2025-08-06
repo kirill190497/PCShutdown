@@ -56,13 +56,20 @@ namespace PCShutdown.Forms
             PortLabel = new System.Windows.Forms.Label();
             ServerPort = new System.Windows.Forms.TextBox();
             darkTheme = new System.Windows.Forms.CheckBox();
+            YandexAliceGroup = new System.Windows.Forms.GroupBox();
+            panel2 = new System.Windows.Forms.Panel();
+            kuzya_info = new System.Windows.Forms.Label();
+            kuzya_settings = new System.Windows.Forms.Button();
+            panel1 = new System.Windows.Forms.Panel();
             advancedGroup.SuspendLayout();
             tgGroup.SuspendLayout();
+            YandexAliceGroup.SuspendLayout();
+            panel2.SuspendLayout();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new System.Drawing.Point(151, 467);
+            button1.Location = new System.Drawing.Point(149, 612);
             button1.Name = "button1";
             button1.Size = new System.Drawing.Size(80, 25);
             button1.TabIndex = 0;
@@ -141,16 +148,16 @@ namespace PCShutdown.Forms
             // 
             // WorkDirPath
             // 
-            WorkDirPath.Location = new System.Drawing.Point(12, 438);
+            WorkDirPath.Location = new System.Drawing.Point(11, 574);
             WorkDirPath.Name = "WorkDirPath";
             WorkDirPath.ReadOnly = true;
-            WorkDirPath.Size = new System.Drawing.Size(254, 23);
+            WorkDirPath.Size = new System.Drawing.Size(324, 23);
             WorkDirPath.TabIndex = 9;
             WorkDirPath.MouseDoubleClick += WorkDirPath_MouseDoubleClick;
             // 
             // browse
             // 
-            browse.Location = new System.Drawing.Point(277, 437);
+            browse.Location = new System.Drawing.Point(341, 574);
             browse.Name = "browse";
             browse.Size = new System.Drawing.Size(75, 23);
             browse.TabIndex = 10;
@@ -171,7 +178,6 @@ namespace PCShutdown.Forms
             // pin_label
             // 
             pin_label.AutoSize = true;
-            pin_label.Enabled = false;
             pin_label.Location = new System.Drawing.Point(6, 24);
             pin_label.Name = "pin_label";
             pin_label.Size = new System.Drawing.Size(54, 15);
@@ -182,7 +188,7 @@ namespace PCShutdown.Forms
             // 
             unlock_pin.Location = new System.Drawing.Point(101, 21);
             unlock_pin.Name = "unlock_pin";
-            unlock_pin.Size = new System.Drawing.Size(100, 23);
+            unlock_pin.Size = new System.Drawing.Size(167, 23);
             unlock_pin.TabIndex = 13;
             unlock_pin.Text = "1904";
             unlock_pin.UseSystemPasswordChar = true;
@@ -190,8 +196,7 @@ namespace PCShutdown.Forms
             // showPin
             // 
             showPin.AutoSize = true;
-            showPin.Enabled = false;
-            showPin.Location = new System.Drawing.Point(207, 23);
+            showPin.Location = new System.Drawing.Point(274, 23);
             showPin.Name = "showPin";
             showPin.Size = new System.Drawing.Size(124, 19);
             showPin.TabIndex = 14;
@@ -202,9 +207,9 @@ namespace PCShutdown.Forms
             // Language
             // 
             Language.FormattingEnabled = true;
-            Language.Location = new System.Drawing.Point(110, 173);
+            Language.Location = new System.Drawing.Point(149, 173);
             Language.Name = "Language";
-            Language.Size = new System.Drawing.Size(242, 23);
+            Language.Size = new System.Drawing.Size(267, 23);
             Language.TabIndex = 15;
             // 
             // LangLabel
@@ -225,9 +230,9 @@ namespace PCShutdown.Forms
             advancedGroup.Controls.Add(unlock_pin);
             advancedGroup.Controls.Add(showPin);
             advancedGroup.Enabled = false;
-            advancedGroup.Location = new System.Drawing.Point(12, 225);
+            advancedGroup.Location = new System.Drawing.Point(12, 202);
             advancedGroup.Name = "advancedGroup";
-            advancedGroup.Size = new System.Drawing.Size(337, 206);
+            advancedGroup.Size = new System.Drawing.Size(404, 206);
             advancedGroup.TabIndex = 17;
             advancedGroup.TabStop = false;
             advancedGroup.Text = "groupBox1";
@@ -242,16 +247,16 @@ namespace PCShutdown.Forms
             tgGroup.Controls.Add(label1);
             tgGroup.Location = new System.Drawing.Point(6, 81);
             tgGroup.Name = "tgGroup";
-            tgGroup.Size = new System.Drawing.Size(325, 113);
+            tgGroup.Size = new System.Drawing.Size(392, 113);
             tgGroup.TabIndex = 18;
             tgGroup.TabStop = false;
             tgGroup.Text = "Telegram Bot";
             // 
             // EditTelegramMenu
             // 
-            EditTelegramMenu.Location = new System.Drawing.Point(159, 80);
+            EditTelegramMenu.Location = new System.Drawing.Point(205, 80);
             EditTelegramMenu.Name = "EditTelegramMenu";
-            EditTelegramMenu.Size = new System.Drawing.Size(160, 23);
+            EditTelegramMenu.Size = new System.Drawing.Size(181, 23);
             EditTelegramMenu.TabIndex = 21;
             EditTelegramMenu.Text = "button2";
             EditTelegramMenu.UseVisualStyleBackColor = true;
@@ -261,7 +266,7 @@ namespace PCShutdown.Forms
             // 
             TelegramAdmin.Location = new System.Drawing.Point(112, 51);
             TelegramAdmin.Name = "TelegramAdmin";
-            TelegramAdmin.Size = new System.Drawing.Size(207, 23);
+            TelegramAdmin.Size = new System.Drawing.Size(274, 23);
             TelegramAdmin.TabIndex = 20;
             TelegramAdmin.KeyPress += TelegramAdmin_KeyPress;
             // 
@@ -278,7 +283,7 @@ namespace PCShutdown.Forms
             // 
             TelegramBotToken.Location = new System.Drawing.Point(112, 22);
             TelegramBotToken.Name = "TelegramBotToken";
-            TelegramBotToken.Size = new System.Drawing.Size(207, 23);
+            TelegramBotToken.Size = new System.Drawing.Size(274, 23);
             TelegramBotToken.TabIndex = 16;
             // 
             // label1
@@ -303,7 +308,7 @@ namespace PCShutdown.Forms
             // 
             ServerPort.Location = new System.Drawing.Point(101, 52);
             ServerPort.Name = "ServerPort";
-            ServerPort.Size = new System.Drawing.Size(100, 23);
+            ServerPort.Size = new System.Drawing.Size(167, 23);
             ServerPort.TabIndex = 17;
             ServerPort.KeyPress += textBox1_KeyPress;
             // 
@@ -317,12 +322,59 @@ namespace PCShutdown.Forms
             darkTheme.Text = "Тёмная тема";
             darkTheme.UseVisualStyleBackColor = true;
             // 
+            // YandexAliceGroup
+            // 
+            YandexAliceGroup.Controls.Add(panel2);
+            YandexAliceGroup.Controls.Add(kuzya_settings);
+            YandexAliceGroup.Location = new System.Drawing.Point(11, 414);
+            YandexAliceGroup.Name = "YandexAliceGroup";
+            YandexAliceGroup.Size = new System.Drawing.Size(405, 154);
+            YandexAliceGroup.TabIndex = 19;
+            YandexAliceGroup.TabStop = false;
+            YandexAliceGroup.Text = "groupBox1";
+            // 
+            // panel2
+            // 
+            panel2.Controls.Add(kuzya_info);
+            panel2.Location = new System.Drawing.Point(7, 22);
+            panel2.Name = "panel2";
+            panel2.Size = new System.Drawing.Size(200, 126);
+            panel2.TabIndex = 3;
+            // 
+            // kuzya_info
+            // 
+            kuzya_info.AutoSize = true;
+            kuzya_info.Dock = System.Windows.Forms.DockStyle.Fill;
+            kuzya_info.Location = new System.Drawing.Point(0, 0);
+            kuzya_info.Name = "kuzya_info";
+            kuzya_info.Size = new System.Drawing.Size(38, 15);
+            kuzya_info.TabIndex = 1;
+            kuzya_info.Text = "label3";
+            // 
+            // kuzya_settings
+            // 
+            kuzya_settings.Location = new System.Drawing.Point(212, 125);
+            kuzya_settings.Name = "kuzya_settings";
+            kuzya_settings.Size = new System.Drawing.Size(187, 23);
+            kuzya_settings.TabIndex = 2;
+            kuzya_settings.Text = "button2";
+            kuzya_settings.UseVisualStyleBackColor = true;
+            kuzya_settings.Click += kuzya_settings_Click;
+            // 
+            // panel1
+            // 
+            panel1.Location = new System.Drawing.Point(216, 69);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(200, 94);
+            panel1.TabIndex = 20;
+            // 
             // ConfigForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            ClientSize = new System.Drawing.Size(364, 501);
+            ClientSize = new System.Drawing.Size(428, 649);
+            Controls.Add(YandexAliceGroup);
             Controls.Add(darkTheme);
             Controls.Add(advancedGroup);
             Controls.Add(LangLabel);
@@ -338,9 +390,11 @@ namespace PCShutdown.Forms
             Controls.Add(delayValue);
             Controls.Add(DelayLabel);
             Controls.Add(button1);
+            Controls.Add(panel1);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             MaximizeBox = false;
             Name = "ConfigForm";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "ConfigForm";
             FormClosing += ConfigForm_FormClosing;
             Load += ConfigForm_Load;
@@ -348,6 +402,9 @@ namespace PCShutdown.Forms
             advancedGroup.PerformLayout();
             tgGroup.ResumeLayout(false);
             tgGroup.PerformLayout();
+            YandexAliceGroup.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -381,5 +438,12 @@ namespace PCShutdown.Forms
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button EditTelegramMenu;
         private System.Windows.Forms.CheckBox darkTheme;
+        private System.Windows.Forms.GroupBox YandexAliceGroup;
+        private System.Windows.Forms.Label kuzya_info;
+        private System.Windows.Forms.Button change_inputs;
+        private System.Windows.Forms.Button kuzya_settings;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Button kuzya_channels;
     }
 }

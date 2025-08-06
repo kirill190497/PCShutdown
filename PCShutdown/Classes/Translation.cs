@@ -45,6 +45,7 @@ namespace PCShutdown.Classes
         public string Hibernation { get; set; }
         public string Sleep { get; set; }
         public string Tasks { get; set; }
+        public string Cancel { get; set; }
         public string CancelTasks { get; set; }
         public string ExitApp { get; set; }
         public string CopiedToClipboard { get; set; }
@@ -103,6 +104,29 @@ namespace PCShutdown.Classes
         public string EnterPinLabel { get; set; }
         public string UnlockButton { get; set; }
         public string EditTelegramMenu { get; set; }
+        public string DarkTheme { get; set; }
+        public string Screenshot {  get; set; }
+        public string VolumeMute { get; set; }
+        public string VolumeUp { get; set; }
+        public string VolumeDown { get; set; }
+
+        public string MediaPause { get; set; }
+        public string MediaNext { get; set; }
+        public string MediaPrev { get; set; }
+        public string Lock { get; set; }
+        public string Unlock { get; set; }
+        public string NotImplemented { get; set; }
+        public string ScreenOff { get; set; }
+        public string ScreenOn { get; set; }
+        public string YouSelected { get; set; }
+        public string EnterLockPin { get; set; }
+        public string EnterUnlockPin { get; set; }
+        public string Delete {  get; set; }
+        public string YandexAlice { get; set; }
+        public string KuzyaSkillInfo { get; set; }
+        public string KuzyaInputs { get; set; }
+        public string KuzyaSettingsButton { get; set; }
+        public string KuzyaChannels { get; set; }
     }
     class Lang
     {
@@ -126,23 +150,13 @@ namespace PCShutdown.Classes
                 JsonSerializer serializer = new JsonSerializer();
                 Lang = (Lang)serializer.Deserialize(file, typeof(Lang));
             }
+            GetNullValues(Lang.Strings);
 
-#if !DEBUG
-            var errors = GetNullValues(Lang.Strings);
-            if (errors.Count != 0)
-            {
-                var msg = "Failed to get string values: " + string.Join(",", errors); ;
-                
-                
-                
-                MessageBox.Show(msg);
-            }
-#endif
         }
 
 
 
-        private static List<string> GetNullValues(object obj)
+        private static void GetNullValues(object obj)
         {
             Type t = obj.GetType();
             //Console.WriteLine("Type is: {0}", t.Name);
@@ -151,10 +165,14 @@ namespace PCShutdown.Classes
             List<string> err = new List<string>();
             foreach (var prop in props)
                 //ShutdownApp.ShowToast(prop.Name);
-                if (prop.GetValue(obj) == null)
-                   err.Add(prop.Name);
+                if (prop.GetValue(obj) == null) 
+                {
+                    prop.SetValue(obj, prop.Name);
+                    // err.Add(prop.Name);
+                }
+                   
 
-            return err;
+            //return err;
         }
     }
 

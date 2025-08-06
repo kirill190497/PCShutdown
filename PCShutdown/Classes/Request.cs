@@ -22,7 +22,7 @@ namespace PCShutdown.Classes
                 var r = new HttpRequestMessage(HttpMethod.Get, $"{Url}?{Data}");
                 r.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
                 r.Headers.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("pcshutdown")));
-                r.Headers.Authorization = new AuthenticationHeaderValue("Basic", "kirill190497:3947fd618c5343c83039ce28f0b15fe084558eb6");
+                //r.Headers.Authorization = new AuthenticationHeaderValue("Basic", "kirill190497:3947fd618c5343c83039ce28f0b15fe084558eb6");
                 r.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
                 
                 return await h.SendAsync(r).Result.Content.ReadAsStringAsync();
@@ -35,6 +35,7 @@ namespace PCShutdown.Classes
             }
 
         }
+
 
         public static string Ping(string address)
         {

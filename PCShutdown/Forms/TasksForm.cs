@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using BlueMystic;
+
 using PCShutdown.Classes;
 
 namespace PCShutdown.Forms
@@ -12,8 +12,7 @@ namespace PCShutdown.Forms
         public TasksForm()
         {
             InitializeComponent();
-            if (ShutdownApp.Cfg.DarkMode)
-                _ = new DarkModeCS(this);
+            
             this.Icon = Icon.FromHandle(Resource.tasks.GetHicon());
 
             ApplyTranslation();
@@ -21,7 +20,6 @@ namespace PCShutdown.Forms
 
         private void ApplyTranslation()
         {
-            
             this.Text = "PCShutdown - " + S.Tasks;
             TaskTime.Text = S.TaskTime;
             TaskType.Text = S.TaskType;
@@ -68,6 +66,7 @@ namespace PCShutdown.Forms
         private void AddByTimer_Click(object sender, EventArgs e)
         {
             ShutdownApp.Forms.ShowForm(typeof(ByTimerConfigForm));
+
         }
 
         private void AddInTime_Click(object sender, EventArgs e)

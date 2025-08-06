@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using GlobExpressions;
 
 namespace PCShutdown.Classes
 {
     internal class Screenshot
     {
+        public static string DirPath = Path.Combine(ShutdownApp.Cfg.WorkPath, "screenshots");
         public static string Save() 
         {
             //Create a new bitmap.
@@ -30,18 +32,39 @@ namespace PCShutdown.Classes
                                         );
 
             // Save the screenshot to the specified path that the user has chosen.
-            var workpath = ShutdownApp.Cfg.WorkPath;
-            var path = Path.Combine(workpath, "screenshot.png");
+            
+            if (!Path.Exists(DirPath))
+            {
+                Directory.CreateDirectory(DirPath);
+            }
+            var date = DateTime.Now;
+
+            var path = Path.Combine(DirPath, $"screenshot_{DateTime.Now:ddMMyyyy_HHmmss-fff}.png");
             
             bmpScreenshot.Save(path, ImageFormat.Png);
             return path;
             
         }
         
-        public static void DeleteFile() {
+        public static IEnumerable<string> FilesList() 
+        {
+            if (Directory.Exists(DirPath))
+            {
+                var files = Glob.Files(DirPath, "*.png");
+
+                return files;
+            }
+            else 
+            {
+                return Enumerable.Empty<string>();
+            }
+
+           
+        }
+        public static void DeleteFiles() {
             var workpath = ShutdownApp.Cfg.WorkPath;
-            var path = Path.Combine(workpath, "screenshot.png");
-            File.Delete(path);
+            Directory.Delete(DirPath, true);
+            Directory.CreateDirectory(DirPath);
         }
     }
 }

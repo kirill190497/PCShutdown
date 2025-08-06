@@ -11,6 +11,8 @@ namespace PCShutdown.Classes
 {
     internal class UrlProtocol
     {
+        public static string Protocol = "pcshutdown";
+        public static string UrlAction = "runcommand";
         public static void Register()
         {
             try
@@ -26,7 +28,7 @@ namespace PCShutdown.Classes
             }
             catch (UnauthorizedAccessException)
             {
-                var key = Registry.ClassesRoot.OpenSubKey("pcshutdown");
+                var key = Registry.ClassesRoot.OpenSubKey(Protocol);
                 var val = key.OpenSubKey("Shell").OpenSubKey("Open").OpenSubKey("Command").GetValue(null).ToString();
                 if (key.GetValue("URL Protocol").ToString() != "" || val != Application.ExecutablePath + " %1")
                 {
@@ -50,12 +52,17 @@ namespace PCShutdown.Classes
             if (m.Success)
             {
                 var proto = m.Groups["proto"].Value;
-                if (proto == "pcshutdown")
+                var cmd = m.Groups["cmd"].Value;
+                var action = m.Groups["action"].Value;
+                if (proto == Protocol)
                 {
-                    var action = m.Groups["action"].Value;
-                    _ = Request.GET(@"http://127.0.0.1:" + Server.localPort, $"password={Program.Cfg.Password}&action={action}");
+                    if (cmd == UrlAction)
+                    {
+                        _ = Request.GET(@"http://127.0.0.1:" + Server.localPort, $"password={Program.Cfg.Password}&action={action}");
+
+                        Environment.Exit(0);
+                    }
                    
-                    Environment.Exit(0);
                 }
                 else
                 {

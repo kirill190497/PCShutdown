@@ -60,7 +60,7 @@
             // 
             menu_lst.Location = new System.Drawing.Point(12, 41);
             menu_lst.Name = "menu_lst";
-            menu_lst.Size = new System.Drawing.Size(381, 239);
+            menu_lst.Size = new System.Drawing.Size(381, 243);
             menu_lst.TabIndex = 2;
             menu_lst.TabStop = false;
             menu_lst.Text = "groupBox1";
@@ -97,6 +97,7 @@
             Controls.Add(AddRow);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             Name = "TelegramMenuForm";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "TelegramMenuForm";
             Load += TelegramMenuForm_Load;
             ((System.ComponentModel.ISupportInitialize)ColsCount).EndInit();

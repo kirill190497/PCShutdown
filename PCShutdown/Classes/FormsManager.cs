@@ -1,4 +1,5 @@
-﻿using PCShutdown.Forms;
+﻿using PCShutdown.Classes.DarkMode;
+using PCShutdown.Forms;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
@@ -57,6 +58,8 @@ namespace PCShutdown.Classes
             return names;
         }
 
+        
+
         public void ShowForm(Type FormType, params object[] args) 
         {
             
@@ -71,13 +74,19 @@ namespace PCShutdown.Classes
             }
             if ( find != null)
             {
-                if(find.Instance.IsDisposed || find.Instance == null)
+                
+                if(find.Instance.IsDisposed)
                 {
                     var instance = (System.Windows.Forms.Form)Activator.CreateInstance(FormType);
                     find.UpdateInstance(instance);
                 }
                 ShutdownApp.GlobalForm.Invoke((MethodInvoker)delegate () {
                     var instance = find.Instance;
+                    instance.StartPosition = FormStartPosition.CenterScreen;
+                    if (Program.Cfg.DarkMode)
+                    {
+                        _ = new DarkModeCS(instance);
+                    }
                     if (instance.InvokeRequired)
                     {
                         instance.Invoke((MethodInvoker)delegate () {
@@ -103,10 +112,17 @@ namespace PCShutdown.Classes
                 else
                     instance = (System.Windows.Forms.Form)Activator.CreateInstance(FormType);
                 Forms.Add(new Form(FormType.Name, instance));
-                ShutdownApp.GlobalForm.Invoke((MethodInvoker)delegate () {
+                _ = ShutdownApp.GlobalForm.Invoke((MethodInvoker)delegate ()
+                {
+                    instance.StartPosition = FormStartPosition.CenterScreen;
+                    if (Program.Cfg.DarkMode)
+                    {
+                        _ = new DarkModeCS(instance);
+                    }
                     if (instance.InvokeRequired)
                     {
-                        instance.Invoke((MethodInvoker)delegate () {
+                        instance.Invoke((MethodInvoker)delegate ()
+                        {
                             instance.Show();
                             instance.Activate();
                         });

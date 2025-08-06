@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PCShutdown.Classes.TelegramBot;
 using System.Collections.Generic;
-using BlueMystic;
+using PCShutdown.Classes.DarkMode;
 
 namespace PCShutdown.Classes
 {
@@ -42,12 +42,12 @@ namespace PCShutdown.Classes
             GlobalForm.Show();
             GlobalForm.Hide();
             ToastNotificationManagerCompat.History.Clear();
-            if (Cfg.TelegramBotToken != "" & Cfg.TelegramAdmin != 0) 
+            if (Cfg.Telegram.BotToken != "" & Cfg.Telegram.Admin != 0) 
             {
                  ShutdownTelegramBot.Run();
             }
 
-            
+            menu.Items.Add("Donate", Resource.donation, OnDonate);
 
             ToolStripItem interfaces = menu.Items.Add(Translation.Lang.Strings.NetworkInterfaces, Resource.ipaddress2);
 
@@ -84,7 +84,8 @@ namespace PCShutdown.Classes
             (links as ToolStripMenuItem).DropDownItems.Add(Translation.Lang.Strings.Hibernation, Resource.hibernate, CreateShortcut);
             (links as ToolStripMenuItem).DropDownItems.Add(Translation.Lang.Strings.LockScreen, Resource.padlock, CreateShortcut);
             (links as ToolStripMenuItem).DropDownItems.Add(Translation.Lang.Strings.RebootPC, Resource.reboot, CreateShortcut);
-            
+            (links as ToolStripMenuItem).DropDownItems.Add(Translation.Lang.Strings.CancelTasks, Resource.cancel, CreateShortcut);
+
             menu.Items.Add(Translation.Lang.Strings.Settings, Resource.settings, OnSettings);
             menu.Items.Add(Translation.Lang.Strings.CancelTasks, Resource.save, OnCancel);
             menu.Items.Add(Translation.Lang.Strings.ExitApp, Resource.close, OnExit);
@@ -147,7 +148,12 @@ namespace PCShutdown.Classes
             Application.Exit();
         }
 
-        
+        private void OnDonate (object sender, EventArgs e)
+        {
+            Forms.ShowForm(typeof(DonateForm));
+        }
+
+
         private void CreateShortcut(object sender, EventArgs e)
         {
             Shortcut.Action action;
@@ -171,6 +177,10 @@ namespace PCShutdown.Classes
             else if (name == Translation.Lang.Strings.LockScreen)
             {
                 action = Shortcut.Action.Lock;
+            }
+            else if (name == Translation.Lang.Strings.CancelTasks)
+            {
+                action = Shortcut.Action.Cancel;
             }
             else
                 action = Shortcut.Action.None;

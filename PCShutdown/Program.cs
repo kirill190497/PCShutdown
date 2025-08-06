@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.IO;
+using PCShutdown.Classes.DarkMode;
+using System.Linq;
 
 namespace PCShutdown
 {
@@ -74,30 +76,31 @@ namespace PCShutdown
         {
             var url = @"https://api.github.com/repos/kirill190497/PCShutdown/releases/latest";
             var remote = Request.GetJSON(url);
-            var remoteVersion = remote["tag_name"].ToString();
-            var rv = remoteVersion.Split(".");
+            var remoteVersion = new Version(remote["tag_name"].ToString());
 
-            var lv = Application.ProductVersion.Split("+")[0].Split('.');
-            bool update = false;
 
-            if (int.Parse(rv[0]) > int.Parse(lv[0]))
-            {
-                update = true;
-            }
-            else if (int.Parse(rv[1]) > int.Parse(lv[1]))
-            {
-                update = true;
-            }
-            else if (int.Parse(rv[2]) > int.Parse(lv[2]))
-            {
-                update = true;
-            }
+            var localVersion = new Version(Application.ProductVersion.Split("+")[0]);
+           
+           
+
             // {major}.{minor}.{patch}
+            // 1.1.0 - 1.0.2
 
             
-            if (update)
+
+
+            if (localVersion.CompareTo(remoteVersion) < 0)
             {
-                var res = MessageBox.Show("New update available! Download now?", "PCShutdown: Update available", MessageBoxButtons.YesNo);
+                DialogResult res;
+                if (Cfg.DarkMode)
+                {
+                    res = Messenger.MessageBox("New update available! Download now?\nChangelog:\n" + remote["body"], "PCShutdown: Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                }
+                else
+                {
+                    res = MessageBox.Show("New update available! Download now?\nChangelog:\n" + remote["body"], "PCShutdown: Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                }
+                 
                 if (res == DialogResult.Yes)
                 {
                     var file_url = remote["assets"][0]["browser_download_url"].ToString();
@@ -118,6 +121,11 @@ namespace PCShutdown
 
         }
 
+        public static void Restart()
+        {
+            Process.Start(Application.ExecutablePath);
+            Environment.Exit(0);
+        }
 
         [STAThread]
         static void Main(string[] args)
@@ -135,7 +143,7 @@ namespace PCShutdown
                 new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.SetCompatibleTextRenderingDefault(true);
 
             if (!CheckFirewallRules())
             {
@@ -214,9 +222,9 @@ namespace PCShutdown
             //string body = message + "\n" + stacktrace + "\n" + source;
 
             var json = JsonConvert.SerializeObject(exception, Formatting.Indented);
-            MessageBox.Show(json);
+            Messenger.MessageBox(json);
 
-            File.AppendAllText(Path.Combine(Cfg.WorkPath, @"crash.log"), json + Environment.NewLine);
+            //File.AppendAllText(Path.Combine(Cfg.WorkPath, @"crash.log"), json + Environment.NewLine);
 
 
 

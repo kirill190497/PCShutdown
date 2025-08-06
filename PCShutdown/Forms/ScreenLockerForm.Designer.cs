@@ -80,6 +80,7 @@
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(600, 177);
             panel1.TabIndex = 3;
+            panel1.Paint += panel1_Paint;
             // 
             // ErrorLabel
             // 
@@ -110,6 +111,7 @@
             Text = "ScreenLockerForm";
             TopMost = true;
             WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            Deactivate += ScreenLockerForm_Deactivate;
             FormClosing += ScreenLockerForm_FormClosing;
             Paint += ScreenLockerForm_Paint;
             KeyDown += ScreenLockerForm_KeyDown;

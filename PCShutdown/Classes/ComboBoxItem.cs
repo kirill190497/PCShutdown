@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PCShutdown.Classes
 {
@@ -40,6 +41,45 @@ namespace PCShutdown.Classes
         public override string ToString()
         {
             return Text;
+        }
+    }
+
+    public class DonateComboBoxItem
+    {
+        public string WalletAddress { get; set; }
+        public string Coin { get; set; }
+        public string Network { get; set; }
+
+
+
+        public DonateComboBoxItem(string coin, string wallet, string network = "")
+        {
+            Coin = coin;
+            WalletAddress = wallet;
+            Network = network;
+        }
+
+        public override string ToString()
+        {
+            string net = Network != "" ? $"({Network})" : "";
+            return $"{Coin} {net}";
+        }
+    }
+
+    public class ActionComboBoxItem
+    {
+        public string TypeValue { get; set; }
+        public string TranslatedType {  get; set; }
+
+        public ActionComboBoxItem(string typeValue, string translatedType)
+        {
+            TypeValue = typeValue;
+            TranslatedType = translatedType;
+        }
+
+        public override string ToString()
+        {
+            return TranslatedType;
         }
     }
 }

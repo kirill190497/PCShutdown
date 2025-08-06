@@ -1,4 +1,4 @@
-﻿using BlueMystic;
+﻿
 using PCShutdown.Classes;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace PCShutdown.Forms
             this.TransparencyKey = Color.AliceBlue;
 
             InitializeComponent();
-            
+
             Locker = new ScreenLocker(pin);
             Pin = pin;
             var bounds = Screen.PrimaryScreen.Bounds;
@@ -105,7 +105,7 @@ namespace PCShutdown.Forms
             };
             if (lockedKeys.Contains(e.KeyCode))
             {
-                //MessageBox.Show(e.KeyCode.ToString());
+                e.Handled = true;
             }
             if (e.KeyCode == Keys.Enter)
             {
@@ -140,6 +140,7 @@ namespace PCShutdown.Forms
 
         }
 
+
         private void pincode_TextChanged(object sender, EventArgs e)
         {
             pincode.ForeColor = Color.Black;
@@ -161,10 +162,24 @@ namespace PCShutdown.Forms
         private void pincode_KeyPress(object sender, KeyPressEventArgs e)
         {
             char number = e.KeyChar;
+
             if (!char.IsDigit(number) && number != 8) // цифры и клавиша BackSpace
             {
                 e.Handled = true;
             }
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            var hatchBrush = new HatchBrush(HatchStyle.Percent30, this.TransparencyKey);
+            e.Graphics.FillRectangle(hatchBrush, this.DisplayRectangle);
+        }
+
+        private void ScreenLockerForm_Deactivate(object sender, EventArgs e)
+        {
+
+            pincode.Focus();
+            
         }
     }
 }

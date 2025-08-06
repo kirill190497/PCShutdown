@@ -13,7 +13,7 @@ namespace PCShutdown.Classes
     {
         public enum Action
         {
-            None, Shutdown, Reboot, Sleep, Hibernate, Lock
+            None, Shutdown, Reboot, Sleep, Hibernate, Lock, Cancel
         }
         public static void Create(string shortcut_name, Action shortcut_action) {
             string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -22,7 +22,7 @@ namespace PCShutdown.Classes
             {
                 var action = Enum.GetName(typeof(Action), shortcut_action).ToLower();
                 writer.WriteLine("[InternetShortcut]");
-                writer.WriteLine($"URL=pcshutdown://runcommand/{action}");
+                writer.WriteLine($"URL={UrlProtocol.Protocol}://{UrlProtocol.UrlAction}/{action}");
                 writer.WriteLine("IconIndex=" + (int)shortcut_action);
                 string app = Application.ExecutablePath;
                 string icon = app.Replace('\\', '/');

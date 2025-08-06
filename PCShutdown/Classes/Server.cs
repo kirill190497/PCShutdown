@@ -42,8 +42,8 @@ namespace PCShutdown.Classes
             public string TemplateName { get; set; }
             public string Volume_Level {  get; set; }
             public object Value { get; set; }
+            public int ErrorCode { get; set; } = 0;
 
-            
         }
 
         public static int localPort = ShutdownApp.Cfg.ServerPort;
@@ -184,6 +184,7 @@ namespace PCShutdown.Classes
                     time = request.QueryString.Get("time") == null ? 0 : long.Parse(request.QueryString.Get("time"));
                     string password_arg = password != null ? "?password=" + password : "";
                     ShutdownTask.TaskType actionType;
+                    StringBuilder ss = new(256);
                     //List<Tuple<string, object>> args = new();
                     Args args;
 
@@ -210,23 +211,23 @@ namespace PCShutdown.Classes
                         {
 
                             //_ = request.QueryString.Get("delay") == null ? delay : Convert.ToInt32(request.QueryString.Get("delay"));
-                            if (action.StartsWith("alexstar")) responseMode = "json";
+                            //if (action.StartsWith("alexstar")) responseMode = "json";
                             switch (action)
                             {
                                 case "alexstar_input":
-                                    string sr = "";
+                                    /*string sr = "";
                                     foreach (var s in request.QueryString.AllKeys)
                                     {
                                        sr += s + " - " + request.QueryString.Get(s) + "\n";
                                     }
-                                    message = sr;
+                                    message = sr;*/
                                     //MessageBox.Show(sr);
                                     args = new()
                                     {
                                         Success = true,
                                         Alert_Type = "success",
                                         TemplateName = "alert",
-                                        Value =  request.QueryString.Get("value") == "{value}" ? ServerHelpers.GetMonitorState() : request.QueryString.Get("value")
+                                        Value =  request.QueryString.Get("value") == "{value}" ? AlexstarHook.GetCurentInput() : request.QueryString.Get("value")
 
                                     };
 
@@ -246,17 +247,28 @@ namespace PCShutdown.Classes
                                         Success = true,
                                         Alert_Type = "success",
                                         TemplateName = "alert",
-                                        Value = AudioManager.GetMasterVolumeMute()
+                                        //Value = AudioManager.GetMasterVolumeMute()
 
                                     };
-                                    var mute = request.QueryString.Get("value");
+                                    try
+                                    {
+                                        var mute = request.QueryString.Get("value");
                                     if (mute != null && mute != "{value}")
                                     {
                                         
                                         AudioManager.SetMasterVolumeMute(Convert.ToBoolean(Convert.ToInt32(mute)));
                                     }
-                                    actionType = ShutdownTask.TaskType.None;
                                     
+                                    }
+                                    catch (Exception)
+                                    {
+                                        args.Success = false;
+                                        args.Alert_Type = "danger";
+                                        args.Text = "Invalid argument.";
+                                        args.ErrorCode = -1;
+                                    }
+                                    actionType = ShutdownTask.TaskType.None;
+                                    args.Value = AudioManager.GetMasterVolumeMute();
                                     break;
                                 case "alexstar_volume":
                                     /*string sr = "";
@@ -271,15 +283,66 @@ namespace PCShutdown.Classes
                                         Success = true,
                                         Alert_Type = "success",
                                         TemplateName = "alert",
-                                        Value = Convert.ToInt32(AudioManager.GetMasterVolume())
+
+                                        //Value = Convert.ToInt32(AudioManager.GetMasterVolume())
+
+                                    };
+                                    try
+                                    {
+                                        var vol = request.QueryString.Get("value");
+                                        if (vol != null && vol != "{value}" && vol != "")
+                                        {
+                                            //MessageBox.Show(vol);
+                                            AudioManager.SetMasterVolume(Convert.ToSingle(vol));
+                                        }
+
+                                    }
+                                    catch (Exception)
+                                    {
+                                        args.Success = false;
+                                        args.Alert_Type = "danger";
+                                        args.Text = "Error change volume. Invalid argument. ";
+                                        args.ErrorCode = -1;
+                                    }
+
+                                    args.Value = Convert.ToInt32(AudioManager.GetMasterVolume());
+                                    args.Text += "Current volume: " + AudioManager.GetMasterVolume();
+
+
+
+                                    actionType = ShutdownTask.TaskType.None;
+                                    break;
+                                case "alexstar_channel":
+                                    /*string sr = "";
+                                    foreach (var s in request.QueryString.AllKeys)
+                                    {
+                                        sr += s + " - " + request.QueryString.Get(s) + "\n";
+                                    }
+                                    message = sr;*/
+                                    //MessageBox.Show(sr);
+                                    args = new()
+                                    {
+                                        Success = true,
+                                        Alert_Type = "success",
+                                        TemplateName = "alert",
+                                        Value = AlexstarHook.GetCurrentChannel()
 
                                     };
 
-                                    var vol = request.QueryString.Get("value");
-                                    if (vol != null && vol != "{value}")
+                                    var channel = request.QueryString.Get("value");
+                                    if (channel != null && channel != "{value}")
                                     {
-                                       
-                                        AudioManager.SetMasterVolume(Convert.ToSingle(vol));
+                                        var k = ShutdownApp.Cfg.AlexStar.Channels[channel].Keys;
+                                        foreach (var r in k)
+                                        {
+                                            //MessageBox.Show(r + " " + ShutdownApp.Cfg.AlexStar.Channels[channel][r]);
+                                            if (r == "run")
+                                            {
+                                                Process.Start(ShutdownApp.Cfg.AlexStar.Channels[channel][r]);
+                                            }
+                                        }
+                                        
+                                        //AlexstarHook.SetCurrentChannel(channel);                                                                                
                                     }
                                     actionType = ShutdownTask.TaskType.None;
                                     break;
@@ -380,6 +443,17 @@ namespace PCShutdown.Classes
                                     };
                                     actionType = ShutdownTask.TaskType.ScreenOff;
                                     break;
+                                case "screenshot":
+                                    args = new()
+                                    {
+                                        Text = ShutdownApp.Translation.Lang.Strings.CommandDone,
+                                        Alert_Type = "success",
+                                        Success = true,
+                                        TemplateName = "alert"
+                                    };
+                                    actionType = ShutdownTask.TaskType.Screenshot;
+                                    responseMode = "image_png";
+                                    break;
                                 case "screenon":
                                     args = new()
                                     {
@@ -390,19 +464,7 @@ namespace PCShutdown.Classes
                                     };
                                     actionType = ShutdownTask.TaskType.ScreenOn;
                                     break;
-                                case "press_space":
-                                    StringBuilder ss = new(256);
-                                    _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
-                                    args = new()
-                                    {
-                                        Success = true,
-                                        Text = ss.ToString(),
-                                        Password = password_arg,
-                                        Alert_Type = "success",
-                                        TemplateName = "redirect"
-                                    };
-                                    actionType = ShutdownTask.TaskType.PressSpace;
-                                    break;
+                               
                                 case "media_pause":
                                     ss = new(256);
                                     _ = ServerHelpers.GetWindowText(ServerHelpers.GetForegroundWindow(), ss, 256);
@@ -563,9 +625,18 @@ namespace PCShutdown.Classes
 
                             header
                         };
-
-
                     }
+                    if (responseMode == "image_png")
+                    {
+                        buffer = File.ReadAllBytes(Screenshot.Save());
+                        var header = "Content-Type:image/png;charset=UTF-8";
+                        response.Headers = new WebHeaderCollection
+                        {
+
+                            header
+                        };
+                    }
+
                     
                     response.ContentLength64 = buffer.Length;
                     try 
@@ -712,7 +783,8 @@ namespace PCShutdown.Classes
                 case ShutdownTask.TaskType.Unlock:
                     baloon_text = message;
                     pin = ShutdownApp.Cfg.UnlockPin.ToString();
-                    if (message != "")
+
+                    if (message != "" && message != null)
                         pin = message;
                     attrib_text = ShutdownApp.Translation.Lang.Strings.LockScreen;
                     
@@ -744,11 +816,6 @@ namespace PCShutdown.Classes
                 case ShutdownTask.TaskType.ScreenOn:
                     ServerHelpers.TurnOnDisplay();
                     break;
-                case ShutdownTask.TaskType.PressSpace:
-                    baloon_text = message;
-                    
-                    ServerHelpers.EmulateKeyClick(Keys.Space, false);  
-                    break;
                 case ShutdownTask.TaskType.MediaPause:
                     baloon_text = message;
 
@@ -778,6 +845,10 @@ namespace PCShutdown.Classes
                     baloon_text = message;
 
                     ServerHelpers.MediaKeyEmulate(Keys.VolumeDown);
+                    break;
+                case ShutdownTask.TaskType.Screenshot:
+                    baloon_text = message;
+                    
                     break;
                 default:
                     baloon_text = ShutdownApp.Translation.Lang.Strings.WrongCommand;

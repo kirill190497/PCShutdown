@@ -9,12 +9,15 @@ using System.Text.Json.Nodes;
 using System.Collections.Generic;
 
 using System.Linq;
-using BlueMystic;
+using PCShutdown.Classes.DarkMode;
+using System.Runtime.CompilerServices;
+
 
 namespace PCShutdown.Forms
 {
     public partial class ConfigForm : Form
     {
+
 
         public List<ComboBoxItem> LoadedLanguages = new List<ComboBoxItem>();
         private readonly Strings S = ShutdownApp.Translation.Lang.Strings;
@@ -22,8 +25,7 @@ namespace PCShutdown.Forms
         private bool AdvancedSettings { get; set; }
         private void InitForm()
         {
-            if (Cfg.DarkMode)
-                _ = new DarkModeCS(this);
+            kuzya_info.MaximumSize = new Size(panel2.Width - 15, 0);
             this.Icon = Icon.FromHandle(Resource.settings.GetHicon());
             WorkDirPath.Text = Cfg.WorkPath;
             delayValue.Text = Cfg.Delay.ToString();
@@ -32,9 +34,9 @@ namespace PCShutdown.Forms
             passwordCheck.Checked = Cfg.PasswordCheck;
             password.Text = Cfg.Password;
             checkMac.Checked = Cfg.CheckMAC;
-            unlock_pin.Text = Cfg.UnlockPin.ToString();
-            TelegramBotToken.Text = Cfg.TelegramBotToken;
-            TelegramAdmin.Text = Cfg.TelegramAdmin.ToString();
+            unlock_pin.Text = Cfg.UnlockPin;
+            TelegramBotToken.Text = Cfg.Telegram.BotToken;
+            TelegramAdmin.Text = Cfg.Telegram.Admin.ToString();
             ServerPort.Text = Cfg.ServerPort.ToString();
             LoadLanguages();
             Language.SelectedItem = LoadedLanguages.Find(x => x.Value.Equals(Cfg.Language));
@@ -43,7 +45,7 @@ namespace PCShutdown.Forms
                 WorkDirPath.Text = Directory.GetCurrentDirectory();
             }
             ApplyTranslation();
-            if(Cfg.AdvancedSettings)
+            if (Cfg.AdvancedSettings)
                 AdvancedSettings = Cfg.AdvancedSettings;
             advancedGroup.Enabled = AdvancedSettings;
 
@@ -51,15 +53,16 @@ namespace PCShutdown.Forms
 
         public ConfigForm()
         {
-            
+
             InitializeComponent();
-            
+
             InitForm();
         }
         public ConfigForm(bool AdvancedSettings)
         {
             InitializeComponent();
             this.AdvancedSettings = AdvancedSettings;
+
             InitForm();
 
         }
@@ -85,10 +88,16 @@ namespace PCShutdown.Forms
             passwordCheck.Text = S.CheckPassword;
             pin_label.Text = S.PinLabel;
             EditTelegramMenu.Text = S.EditTelegramMenu;
+            darkTheme.Text = S.DarkTheme;
+            YandexAliceGroup.Text = S.YandexAlice;
+
+            kuzya_settings.Text = S.KuzyaSettingsButton;
+            kuzya_info.Text = S.KuzyaSkillInfo;
+
         }
         private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            
+
         }
 
         private void LoadLanguages()
@@ -129,41 +138,52 @@ namespace PCShutdown.Forms
         private void button1_Click(object sender, EventArgs e)
         {
             bool need_restart = false;
-            
+
             Cfg.Delay = Convert.ToInt32(delayValue.Text);
             Cfg.Autorun = autorun.Checked;
             Cfg.PasswordCheck = passwordCheck.Checked;
             Cfg.Password = password.Text;
             Cfg.CheckMAC = checkMac.Checked;
-            Cfg.UnlockPin = int.Parse(unlock_pin.Text);
+            Cfg.UnlockPin = unlock_pin.Text;
             Cfg.ServerPort = Convert.ToInt32(ServerPort.Text);
-            Cfg.DarkMode = darkTheme.Checked;
-            if (Cfg.TelegramAdmin != Convert.ToInt32(TelegramAdmin.Text) || Cfg.TelegramBotToken != TelegramBotToken.Text)
+            if (Cfg.DarkMode != darkTheme.Checked)
             {
-                 need_restart = true;
+                need_restart = true;
             }
-
-            Cfg.TelegramAdmin = Convert.ToInt32(TelegramAdmin.Text);
-            Cfg.TelegramBotToken = TelegramBotToken.Text;
-#if !DEBUG
+            Cfg.DarkMode = darkTheme.Checked;
+            if (Cfg.Telegram.Admin != Convert.ToInt32(TelegramAdmin.Text) || Cfg.Telegram.BotToken != TelegramBotToken.Text)
+            {
+                need_restart = true;
+            }
             Cfg.WorkPath = WorkDirPath.Text;
-            RegistryKey cukey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+            Cfg.Telegram.Admin = Convert.ToInt32(TelegramAdmin.Text);
+            Cfg.Telegram.BotToken = TelegramBotToken.Text;
+#if !DEBUG
+            
+            RegistryKey Run_cukey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+            RegistryKey Paths_cukey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\PCShutdown.exe");
             if (autorun.Checked)
             {
+                var exefile_path = Path.Combine(WorkDirPath.Text, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe");
+                Run_cukey.SetValue("PCShutdown", exefile_path);
+                Paths_cukey.SetValue("", exefile_path);
+                Paths_cukey.SetValue("Path", WorkDirPath.Text);
 
-                cukey.SetValue("PCShutdown", WorkDirPath.Text + "\\" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe");
             }
             else
             {
-                if (cukey.GetValue("PCShutdown") != null)
-                    cukey.DeleteValue("PCShutdown");
+                if (Run_cukey.GetValue("PCShutdown") != null)
+                    Run_cukey.DeleteValue("PCShutdown");
             }
 #endif
             var lang = ((ComboBoxItem)Language.SelectedItem);
-            if (ShutdownApp.Translation.Lang.Short != lang.Value )
+            if (ShutdownApp.Translation.Lang.Short != lang.Value)
             {
+                need_restart = true;
                 Cfg.Language = lang.Value;
-
+            }
+            if (need_restart)
+            {
                 var answer = MessageBox.Show(lang.Question, lang.ShortQuestion, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (answer == DialogResult.Yes)
                 {
@@ -177,18 +197,18 @@ namespace PCShutdown.Forms
             }
             Cfg.Save();
             Hide();
-            string text = string.Format("{0}: {1}\n{2}: {3}\n{4}\n{5}: {6}\n{7}: {8}",
+            string text = string.Format("{0}: {1}\n{2}: {3}\n{4}\n{5}: {6}\n{7}: {8}\n{9}: {10}",
                 S.AutorunLabel, autorun.Checked ? S.On : S.Off, S.CheckPassword, // {0} {1}
                 passwordCheck.Checked ? S.Yes : S.No, // {2} {3}
                 passwordCheck.Checked ? S.PasswordLabel + ": " + password.Text : "", // {4}
                 S.LanguageLabel, lang.Text, // {5} {6}
-                S.WorkingPath, WorkDirPath.Text); // {7} {8}
+                S.WorkingPath, WorkDirPath.Text, // {7} {8}
+                S.DarkTheme, darkTheme.Checked ? S.Yes : S.No);
             ShutdownApp.ShowToast(text, S.SettingsSaved);
 
             if (need_restart)
             {
-                System.Diagnostics.Process.Start(Application.ExecutablePath);
-                Environment.Exit(0);
+                Program.Restart();
             }
 
         }
@@ -257,7 +277,7 @@ namespace PCShutdown.Forms
             {
                 e.Handled = true;
             }
-            
+
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -268,6 +288,16 @@ namespace PCShutdown.Forms
         private void EditTelegramMenu_Click(object sender, EventArgs e)
         {
             ShutdownApp.Forms.ShowForm(typeof(TelegramMenuForm));
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void kuzya_settings_Click(object sender, EventArgs e)
+        {
+            ShutdownApp.Forms.ShowForm(typeof(KuzyaSettingsForm));
         }
     }
 }
